@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Dialog } from '@/components/dialog'
@@ -78,6 +78,7 @@ export function PublicHeader(props: PublicHeaderProps) {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
   const [authPromptTarget, setAuthPromptTarget] =
     useState<AuthPromptTarget | null>(null)
   const [authPromptSecondsLeft, setAuthPromptSecondsLeft] =
@@ -131,8 +132,16 @@ export function PublicHeader(props: PublicHeaderProps) {
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (mobileOpen && event.key === 'Escape') {
+        setMobileOpen(false)
+        menuButtonRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
     return () => {
       document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKeyDown)
     }
   }, [mobileOpen])
 
@@ -202,16 +211,16 @@ export function PublicHeader(props: PublicHeaderProps) {
       <header className='pointer-events-none fixed inset-x-0 top-0 z-50'>
         <div
           className={cn(
-            'pointer-events-auto mx-auto transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
-            scrolled ? 'max-w-[52rem] px-3 pt-3' : 'max-w-7xl px-4 pt-0 md:px-6'
+            'pointer-events-auto mx-auto max-w-7xl px-4 transition-all duration-300 md:px-6',
+            scrolled ? 'pt-3' : 'pt-2'
           )}
         >
           <nav
             className={cn(
               'flex items-center justify-between gap-2 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]',
               scrolled
-                ? 'bg-background/60 ring-border/50 h-12 rounded-2xl pr-1.5 pl-4 shadow-[0_2px_16px_-6px_rgba(0,0,0,0.08),0_0_0_0.5px_rgba(0,0,0,0.02)] ring-[0.5px] backdrop-blur-2xl dark:shadow-[0_2px_16px_-6px_rgba(0,0,0,0.4)]'
-                : 'h-16 px-2'
+                ? 'bg-background/95 ring-border h-16 rounded-2xl px-4 shadow-sm ring-1 backdrop-blur-xl'
+                : 'bg-background/90 h-16 rounded-2xl px-4 backdrop-blur-xl'
             )}
           >
             {/* Logo */}
@@ -220,11 +229,11 @@ export function PublicHeader(props: PublicHeaderProps) {
                 to={homeUrl}
                 className='group flex min-w-0 items-center gap-2.5'
               >
-                <div className='flex size-7 shrink-0 items-center justify-center transition-all duration-300 group-hover:scale-105'>
+                <div className='flex size-9 shrink-0 items-center justify-center transition-transform duration-200 group-hover:scale-105'>
                   {logoContent}
                 </div>
                 <span
-                  className='max-w-48 truncate text-sm font-semibold tracking-tight'
+                  className='max-w-48 truncate text-xl font-semibold tracking-[-0.055em]'
                   title={displaySiteName}
                 >
                   {loading ? (
@@ -317,12 +326,15 @@ export function PublicHeader(props: PublicHeaderProps) {
                 <ProfileDropdown />
               )}
               <Button
+                ref={menuButtonRef}
                 type='button'
                 variant='ghost'
                 size='icon'
                 className='size-9'
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label={t('Toggle navigation menu')}
+                aria-expanded={mobileOpen}
+                aria-controls='public-mobile-navigation'
               >
                 <div className='relative size-4'>
                   <span
@@ -352,6 +364,9 @@ export function PublicHeader(props: PublicHeaderProps) {
 
       {/* Mobile full-screen overlay */}
       <div
+        id='public-mobile-navigation'
+        inert={!mobileOpen}
+        aria-hidden={!mobileOpen}
         className={cn(
           'bg-background/98 fixed inset-0 z-40 backdrop-blur-2xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:pointer-events-none lg:hidden',
           mobileOpen

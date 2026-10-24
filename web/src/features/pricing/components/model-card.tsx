@@ -267,11 +267,11 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
   }
 
   return (
-    <Card className='hover:ring-foreground/20 h-full min-w-0 gap-3 transition-colors'>
+    <Card className='hover:ring-primary/30 h-full min-w-0 gap-4 rounded-2xl transition-colors'>
       <CardHeader className='flex flex-row items-start gap-3'>
         <div
           aria-hidden
-          className='bg-muted/50 flex size-10 shrink-0 items-center justify-center rounded-lg'
+          className='bg-accent flex size-11 shrink-0 items-center justify-center rounded-xl'
         >
           {modelIcon || (
             <span className='text-muted-foreground text-sm font-bold'>
@@ -328,7 +328,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
         <div
           role='group'
           aria-label={t('Pricing')}
-          className='mt-auto flex min-w-0 flex-col gap-1.5'
+          className='bg-muted/40 mt-auto flex min-w-0 flex-col gap-2 rounded-xl p-3'
         >
           <ModelBillingModeBadge model={props.model} appearance='caption' />
           {dynamicSummary?.providerCount && (

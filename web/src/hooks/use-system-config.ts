@@ -21,6 +21,7 @@ import { useEffect, useCallback } from 'react'
 
 import { DEFAULT_LOGO } from '@/lib/constants'
 import { applyFaviconToDom } from '@/lib/dom-utils'
+import { resolveSiteBrand } from '@/lib/omnivo-brand'
 import { ensureStatus } from '@/lib/status-query'
 import { useSystemConfigStore } from '@/stores/system-config-store'
 
@@ -62,6 +63,7 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
   const queryClient = useQueryClient()
   const { config, loading, loadedLogoUrl, setLoadedLogoUrl, setLoading } =
     useSystemConfigStore()
+  const brand = resolveSiteBrand(config.systemName, config.logo)
 
   // Load config from backend via the shared `/api/status` cache.
   // `ensureStatus` writes the mapped config into this store itself, so there is
@@ -84,7 +86,7 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
 
   // Preload logo image when URL changes
   useEffect(() => {
-    const { logo } = config
+    const { logo } = brand
 
     // Skip if logo is already loaded
     if (!logo || logo === loadedLogoUrl) return
@@ -106,11 +108,16 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
       }
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.logo, loadedLogoUrl, setLoadedLogoUrl])
+  }, [brand.logo, loadedLogoUrl, setLoadedLogoUrl])
+
+  useEffect(() => {
+    if (autoLoad) document.title = `${brand.systemName} · Many models. One API.`
+  }, [autoLoad, brand.systemName])
 
   return {
     ...config,
+    ...brand,
     loading,
-    logoLoaded: config.logo === loadedLogoUrl && !!loadedLogoUrl,
+    logoLoaded: brand.logo === loadedLogoUrl && !!loadedLogoUrl,
   }
 }

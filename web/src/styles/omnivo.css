@@ -1,0 +1,96 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+/* Omnivo's default palette. Explicit user theme presets still take precedence. */
+:root {
+  --omnivo-ink: #102c29;
+  --omnivo-mint: #78e9bd;
+  --omnivo-paper: #f5f7f1;
+  --font-ui-sans: 'Public Sans Variable', 'Public Sans', system-ui, sans-serif;
+  --background: var(--omnivo-paper);
+  --foreground: var(--omnivo-ink);
+  --card: #ffffff;
+  --card-foreground: var(--omnivo-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--omnivo-ink);
+  --primary: #163e34;
+  --primary-foreground: #f5f7f1;
+  --secondary: #e3eee5;
+  --secondary-foreground: #173e34;
+  --muted: #eaf0e8;
+  --muted-foreground: #52665c;
+  --accent: #dceee2;
+  --accent-foreground: #143b31;
+  --border: #d7e0d7;
+  --input: #cbd7cd;
+  --ring: #27805e;
+  --sidebar: #eef3eb;
+  --sidebar-foreground: var(--omnivo-ink);
+  --sidebar-primary: #163e34;
+  --sidebar-primary-foreground: var(--omnivo-paper);
+  --sidebar-accent: #dceee2;
+  --sidebar-accent-foreground: #143b31;
+  --sidebar-border: #d7e0d7;
+  --sidebar-ring: #27805e;
+}
+
+.dark {
+  --background: #0b201c;
+  --foreground: #f0f4ec;
+  --card: #123229;
+  --card-foreground: #f0f4ec;
+  --popover: #123229;
+  --popover-foreground: #f0f4ec;
+  --primary: var(--omnivo-mint);
+  --primary-foreground: var(--omnivo-ink);
+  --secondary: #24473b;
+  --secondary-foreground: #e4f0e7;
+  --muted: #193a30;
+  --muted-foreground: #a7bdb0;
+  --accent: #24473b;
+  --accent-foreground: #e4f0e7;
+  --border: #2c4b3e;
+  --input: #36594a;
+  --ring: var(--omnivo-mint);
+  --sidebar: #0e281f;
+  --sidebar-foreground: #f0f4ec;
+  --sidebar-primary: var(--omnivo-mint);
+  --sidebar-primary-foreground: var(--omnivo-ink);
+  --sidebar-accent: #24473b;
+  --sidebar-accent-foreground: #e4f0e7;
+  --sidebar-border: #2c4b3e;
+  --sidebar-ring: var(--omnivo-mint);
+}
+
+.omnivo-inverse {
+  --background: var(--omnivo-ink);
+  --foreground: var(--omnivo-paper);
+  --card: #193d37;
+  --card-foreground: var(--omnivo-paper);
+  --primary: var(--omnivo-mint);
+  --primary-foreground: var(--omnivo-ink);
+  --secondary: #234b40;
+  --secondary-foreground: var(--omnivo-paper);
+  --muted: #193d37;
+  --muted-foreground: #b9d1c7;
+  --accent: #234b40;
+  --accent-foreground: var(--omnivo-paper);
+  --border: #34564d;
+  --input: #34564d;
+  --ring: var(--omnivo-mint);
+}

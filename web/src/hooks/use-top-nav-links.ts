@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useStatus } from '@/hooks/use-status'
 import { parseHeaderNavModulesFromStatus } from '@/lib/nav-modules'
+import { resolveDocumentationLink } from '@/lib/omnivo-brand'
 import { useAuthStore } from '@/stores/auth-store'
 
 export type TopNavLink = {
@@ -88,11 +89,7 @@ export function useTopNavLinks(): TopNavLink[] {
 
   // Docs (supports external links)
   if (modules?.docs !== false) {
-    if (docsLink) {
-      links.push({ title: t('Docs'), href: docsLink, external: true })
-    } else {
-      links.push({ title: t('Docs'), href: '/docs' })
-    }
+    links.push({ title: t('Docs'), ...resolveDocumentationLink(docsLink) })
   }
 
   // About

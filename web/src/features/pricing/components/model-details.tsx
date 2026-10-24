@@ -17,9 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { useNavigate, useParams, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useParams, useSearch } from '@tanstack/react-router'
 import {
   ArrowLeft,
+  BookOpen,
   CalendarClock,
   Code2,
   FileText,
@@ -38,6 +39,7 @@ import { StaticDataTable } from '@/components/data-table'
 import { sideDrawerContentClassName } from '@/components/drawer-layout'
 import { GroupBadge } from '@/components/group-badge'
 import { PublicLayout } from '@/components/layout'
+import { Footer } from '@/components/layout/components/footer'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -100,6 +102,7 @@ import type {
   PricingModel,
   TokenUnit,
 } from '../types'
+import { CatalogError } from './catalog-error'
 import { DynamicPricingBreakdown } from './dynamic-pricing-breakdown'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
 import { ModelDetailsApi } from './model-details-api'
@@ -602,22 +605,22 @@ function ModelHeader(props: { model: PricingModel }) {
   const description = model.description || model.vendor_description || null
 
   return (
-    <header className='pb-4'>
-      <div className='flex items-center gap-2.5'>
+    <header className='border-border/70 mb-2 border-b pb-6'>
+      <div className='flex min-w-0 items-center gap-3'>
         {modelIcon}
-        <h1 className='font-mono text-xl font-bold tracking-tight sm:text-2xl'>
+        <h1 className='min-w-0 flex-1 font-mono text-xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-3xl'>
           {model.model_name}
         </h1>
         <CopyButton
           value={model.model_name || ''}
-          className='size-6'
+          className='size-8 shrink-0'
           iconClassName='size-3'
           tooltip={t('Copy model name')}
           successTooltip={t('Copied!')}
           aria-label={t('Copy model name')}
         />
       </div>
-      <div className='mt-1 flex flex-wrap items-center gap-1.5 text-xs'>
+      <div className='mt-3 flex flex-wrap items-center gap-2 text-xs'>
         {model.vendor_name && (
           <span className='text-muted-foreground'>{model.vendor_name}</span>
         )}
@@ -625,7 +628,7 @@ function ModelHeader(props: { model: PricingModel }) {
         <ModelBillingModeBadge model={model} />
       </div>
       {description && (
-        <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
+        <p className='text-muted-foreground mt-4 max-w-3xl text-sm leading-relaxed'>
           {description}
         </p>
       )}
@@ -1608,6 +1611,8 @@ export function ModelDetails() {
     endpointMap,
     autoGroups,
     isLoading,
+    error,
+    refetch,
     priceRate,
     usdExchangeRate,
   } = usePricingData()
@@ -1649,6 +1654,16 @@ export function ModelDetails() {
     )
   }
 
+  if (error) {
+    return (
+      <PublicLayout>
+        <div className='mx-auto max-w-5xl px-4 sm:px-6'>
+          <CatalogError onRetry={() => void refetch()} />
+        </div>
+      </PublicLayout>
+    )
+  }
+
   if (!model) {
     return (
       <PublicLayout>
@@ -1668,17 +1683,18 @@ export function ModelDetails() {
   }
 
   return (
-    <PublicLayout>
-      <div className='mx-auto max-w-5xl px-4 sm:px-6'>
-        <Button
-          variant='ghost'
-          size='sm'
-          onClick={handleBack}
-          className='text-muted-foreground hover:text-foreground mb-4 h-auto gap-1 px-0 py-1 text-xs'
-        >
-          <ArrowLeft className='size-3.5' />
-          {t('Back')}
-        </Button>
+    <PublicLayout showMainContainer={false}>
+      <main className='mx-auto max-w-5xl px-4 pt-24 pb-16 sm:px-6 sm:pt-28'>
+        <div className='mb-8 flex flex-wrap items-center justify-between gap-3'>
+          <Button variant='ghost' size='sm' onClick={handleBack}>
+            <ArrowLeft aria-hidden className='size-3.5' />
+            {t('Back to Models')}
+          </Button>
+          <Button variant='outline' size='sm' render={<Link to='/docs' />}>
+            <BookOpen aria-hidden />
+            {t('Integration guide')}
+          </Button>
+        </div>
 
         <ModelDetailsContent
           model={model}
@@ -1696,7 +1712,8 @@ export function ModelDetails() {
             >) || {}
           }
         />
-      </div>
+      </main>
+      <Footer />
     </PublicLayout>
   )
 }

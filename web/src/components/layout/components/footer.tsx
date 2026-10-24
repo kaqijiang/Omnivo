@@ -220,7 +220,25 @@ export function Footer(props: FooterProps) {
     [t]
   )
 
-  const displayColumns = props.columns ?? fallbackColumns
+  const omnivoColumns: FooterColumnProps[] = [
+    {
+      title: t('Explore'),
+      links: [
+        { text: t('Models'), href: '/pricing' },
+        { text: t('Docs'), href: '/docs' },
+      ],
+    },
+    {
+      title: t('Build'),
+      links: [
+        { text: t('Console'), href: '/dashboard' },
+        { text: t('API Keys'), href: '/keys' },
+      ],
+    },
+  ]
+  const isOmnivo = displayName === 'Omnivo'
+  const displayColumns =
+    props.columns ?? (isOmnivo ? omnivoColumns : fallbackColumns)
 
   if (footerHtml) {
     return (
@@ -258,28 +276,30 @@ export function Footer(props: FooterProps) {
               <img
                 src={displayLogo}
                 alt={displayName}
-                className='size-7 rounded-lg object-contain'
+                className='size-10 rounded-xl object-contain'
               />
-              <span className='text-sm font-semibold tracking-tight'>
+              <span className='text-2xl font-semibold tracking-[-0.055em]'>
                 {displayName}
               </span>
             </Link>
-            <p className='text-muted-foreground/60 mt-3 max-w-[200px] text-xs leading-relaxed'>
-              {t('Powerful API Management Platform')}
+            <p className='text-muted-foreground mt-3 max-w-xs text-sm leading-relaxed'>
+              {isOmnivo
+                ? t('Many models. One API.')
+                : t('Powerful API Management Platform')}
             </p>
           </div>
 
           {/* Links columns */}
-          {isDemoSiteMode && (
+          {(isOmnivo || isDemoSiteMode || props.columns) && (
             <div className='grid grid-cols-3 gap-8 md:gap-16'>
-              {displayColumns.map((column, index) => (
-                <div key={index}>
+              {displayColumns.map((column) => (
+                <div key={column.title}>
                   <p className='text-muted-foreground/50 mb-3 text-xs font-medium tracking-wider uppercase'>
                     {t(column.title)}
                   </p>
                   <ul className='space-y-2.5'>
-                    {column.links.map((link, linkIndex) => (
-                      <li key={linkIndex}>
+                    {column.links.map((link) => (
+                      <li key={`${link.href}:${link.text}`}>
                         <FooterLinkItem link={link} />
                       </li>
                     ))}

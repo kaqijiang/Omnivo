@@ -16,15 +16,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
+import { CatalogError } from '../components/catalog-error'
+import { EmptyState } from '../components/empty-state'
 import { PricingSidebar } from '../components/pricing-sidebar'
 import {
   PricingToolbar,
   type PricingToolbarProps,
 } from '../components/pricing-toolbar'
+import { SearchBar } from '../components/search-bar'
 import type { PricingModel } from '../types'
 
 function toolbarProps(): PricingToolbarProps {
@@ -61,6 +64,73 @@ function toolbarProps(): PricingToolbarProps {
 }
 
 describe('pricing controls', () => {
+  it('explains an empty catalog without suggesting filters can reveal unavailable models', () => {
+    render(<EmptyState hasActiveFilters={false} onClearFilters={vi.fn()} />)
+
+    expect(
+      screen.getByText('The model catalog is being prepared.')
+    ).toBeVisible()
+    expect(
+      screen.getByText(
+        'Models will appear here once they are available. Check back soon.'
+      )
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('button', { name: 'Clear all filters' })
+    ).not.toBeInTheDocument()
+  })
+
+  it('offers to clear an unsuccessful search instead of presenting an unconfigured catalog', async () => {
+    const onClear = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <EmptyState
+        searchQuery='unknown-model'
+        hasActiveFilters={false}
+        onClearFilters={onClear}
+      />
+    )
+
+    expect(screen.getByText('No models found')).toBeVisible()
+    expect(
+      screen.getByText(
+        'No results for "unknown-model". Try adjusting your search or filters.'
+      )
+    ).toBeVisible()
+    await user.click(screen.getByRole('button', { name: 'Clear all filters' }))
+    expect(onClear).toHaveBeenCalledOnce()
+  })
+
+  it('offers a retry when catalog loading fails without showing a no-models message', async () => {
+    const onRetry = vi.fn()
+    const user = userEvent.setup()
+    render(<CatalogError onRetry={onRetry} />)
+
+    expect(screen.getByText('Model catalog unavailable')).toBeVisible()
+    expect(
+      screen.queryByText('The model catalog is being prepared.')
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(onRetry).toHaveBeenCalledOnce()
+  })
+
+  it('keeps search keyboard focus, editing, and clearing available with the shared input', async () => {
+    const onChange = vi.fn()
+    const onClear = vi.fn()
+    const user = userEvent.setup()
+    render(<SearchBar value='model' onChange={onChange} onClear={onClear} />)
+    const search = screen.getByRole('textbox', { name: 'Search models' })
+
+    fireEvent.keyDown(document, { key: 'k', ctrlKey: true })
+    expect(search).toHaveFocus()
+    await user.type(search, 'x')
+    expect(onChange).toHaveBeenLastCalledWith('modelx')
+    await user.keyboard('{Escape}')
+    expect(search).not.toHaveFocus()
+    await user.click(screen.getByRole('button', { name: 'Clear search' }))
+    expect(onClear).toHaveBeenCalledOnce()
+  })
+
   it('counts each model once per filter and updates counts when the catalog changes', () => {
     const props = toolbarProps()
     const base: PricingModel = {
