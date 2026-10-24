@@ -1,0 +1,66 @@
+# Omnivo local deployment, built from this repository's New API source.
+# Start: docker compose -f compose.local.yml up -d --build --wait
+name: omnivo-local
+
+services:
+  omnivo:
+    image: omnivo-new-api:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:${OMNIVO_PORT:-3000}:3000"
+    volumes:
+      - data:/data
+    environment:
+      TZ: Asia/Shanghai
+      DEFAULT_LANGUAGE: zh-CN
+      TRUSTED_PROXIES: none
+      SESSION_COOKIE_SECURE: "false"
+    # Keep signing/encryption keys with the database across container rebuilds.
+    # Never regenerate a missing key when a database already exists.
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        umask 077
+        mkdir -p /data/.secrets
+        chmod 700 /data/.secrets
+        for key in session crypto; do
+          secret_file="/data/.secrets/$$key"
+          if [ ! -e "$$secret_file" ]; then
+            if [ -e /data/one-api.db ]; then
+              echo "Missing persisted key; restore the complete data volume from backup." >&2
+              exit 1
+            fi
+            od -An -N32 -tx1 /dev/urandom | tr -d ' \n' > "$$secret_file.tmp"
+            mv "$$secret_file.tmp" "$$secret_file"
+          fi
+          secret="$$(cat "$$secret_file")"
+          case "$$secret" in
+            ''|*[!0-9a-f]*) echo "Invalid persisted key; restore it from backup." >&2; exit 1 ;;
+          esac
+          if [ "$${#secret}" -ne 64 ]; then
+            echo "Invalid persisted key length; restore it from backup." >&2
+            exit 1
+          fi
+          chmod 600 "$$secret_file"
+        done
+        export SESSION_SECRET="$$(cat /data/.secrets/session)"
+        export CRYPTO_SECRET="$$(cat /data/.secrets/crypto)"
+        exec /new-api --log-dir /data/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:3000/api/status | grep -q '\"success\":[[:space:]]*true'"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  data:

@@ -10,3 +10,21 @@ docs
 /web/node_modules
 /web/dist
 !THIRD-PARTY-LICENSES.md
+
+# Local deployment data and credentials must not enter image build layers.
+.env
+.env.*
+!.env.example
+data
+logs
+backups
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+.local-tests
+.gomodcache
+.cache
+.gopath
+.gocache-temp
+tiktoken_cache
