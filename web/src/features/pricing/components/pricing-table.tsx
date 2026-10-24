@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { Row, PaginationState } from '@tanstack/react-table'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -40,6 +40,7 @@ export interface PricingTableProps {
   showRechargePrice?: boolean
   selectedGroup?: string
   onModelClick?: (modelName: string) => void
+  renderModelLink?: (modelName: string) => ReactNode
 }
 
 export function PricingTable(props: PricingTableProps) {
@@ -66,6 +67,7 @@ export function PricingTable(props: PricingTableProps) {
     usdExchangeRate,
     showRechargePrice,
     selectedGroup,
+    renderModelLink: props.renderModelLink,
   })
 
   const { table } = useDataTable({

@@ -88,6 +88,27 @@ afterEach(() => {
 })
 
 describe('model cards', () => {
+  it('offers a full model link while keeping quick details as a separate action', async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    const name = 'provider/versioned-model'
+    render(
+      <ModelCard
+        model={pricingModel({ model_name: name })}
+        onClick={onClick}
+        modelLink={<a href='/pricing/provider%2Fversioned-model'>{name}</a>}
+      />
+    )
+
+    const link = screen.getByRole('link', { name })
+    expect(link).toHaveAttribute('href', '/pricing/provider%2Fversioned-model')
+    link.focus()
+    expect(link).toHaveFocus()
+    expect(onClick).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Details' }))
+    expect(onClick).toHaveBeenCalledWith(name)
+  })
+
   it('shows separate generic and image cache prices including a free image cache', () => {
     render(
       <CachedPriceCell

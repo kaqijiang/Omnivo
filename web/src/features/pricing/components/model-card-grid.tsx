@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { memo, useMemo, useState } from 'react'
+import { memo, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,7 @@ export interface ModelCardGridProps {
   tokenUnit?: TokenUnit
   showRechargePrice?: boolean
   selectedGroup?: string
+  renderModelLink?: (modelName: string) => ReactNode
 }
 
 export const ModelCardGrid = memo(function ModelCardGrid(
@@ -105,6 +106,7 @@ export const ModelCardGrid = memo(function ModelCardGrid(
             selectedGroup={props.selectedGroup}
             perf={perfMap.get(model.model_name || '')}
             onClick={props.onModelClick}
+            modelLink={props.renderModelLink?.(model.model_name)}
           />
         ))}
       </div>

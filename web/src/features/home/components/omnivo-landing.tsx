@@ -37,6 +37,9 @@ import {
 import { Separator } from '@/components/ui/separator'
 
 import { OmnivoCodeSample } from './omnivo-code-sample'
+import { OmnivoModelDiscovery } from './omnivo-model-discovery'
+import { OmnivoModelSearch } from './omnivo-model-search'
+import { OmnivoFaq, OmnivoPricingStory } from './omnivo-pricing-story'
 import { OmnivoQuickstart } from './omnivo-quickstart'
 
 interface OmnivoLandingProps {
@@ -100,6 +103,7 @@ export function OmnivoLanding(props: OmnivoLandingProps) {
                 'A simpler way to build with AI. Explore models, connect your app, and manage your usage with Omnivo.'
               )}
             </p>
+            <OmnivoModelSearch />
             <div className='mt-9 flex flex-wrap gap-3'>
               <Button
                 role='link'
@@ -145,6 +149,9 @@ export function OmnivoLanding(props: OmnivoLandingProps) {
           </ul>
         </div>
       </section>
+
+      <OmnivoModelDiscovery isAuthenticated={props.isAuthenticated} />
+      <OmnivoPricingStory />
 
       <section
         aria-labelledby='omnivo-capabilities-title'
@@ -196,10 +203,11 @@ export function OmnivoLanding(props: OmnivoLandingProps) {
       </section>
 
       <OmnivoQuickstart />
+      <OmnivoFaq />
 
       <section
         aria-labelledby='omnivo-cta-title'
-        className='mx-auto max-w-7xl px-6 pb-20 md:px-10 lg:pb-28'
+        className='mx-auto max-w-7xl px-6 pt-20 pb-20 md:px-10 lg:pt-24 lg:pb-28'
       >
         <div className='omnivo-inverse bg-background text-foreground rounded-3xl px-7 py-10 md:px-12 md:py-14'>
           <div className='flex flex-col items-start justify-between gap-8 md:flex-row md:items-center'>

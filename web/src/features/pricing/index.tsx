@@ -118,6 +118,31 @@ export function Pricing() {
     clearSearch()
   }, [clearFilters, clearSearch])
 
+  const modelGuideSearch = {
+    search: searchInput || undefined,
+    sort: sortBy,
+    vendor: vendorFilter,
+    group: groupFilter,
+    quotaType: quotaTypeFilter,
+    endpointType: endpointTypeFilter,
+    tag: tagFilter,
+    tokenUnit,
+    view: viewMode,
+    rechargePrice: showRechargePrice,
+  }
+
+  const renderModelLink = (modelName: string) => (
+    <Link
+      to='/pricing/$modelId'
+      params={{ modelId: modelName }}
+      search={modelGuideSearch}
+      onClick={(event) => event.stopPropagation()}
+      className='hover:text-primary rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2'
+    >
+      {modelName}
+    </Link>
+  )
+
   const renderPricingContent = () => {
     if (error) {
       return <CatalogError onRetry={() => void refetch()} />
@@ -143,6 +168,7 @@ export function Pricing() {
           tokenUnit={tokenUnit}
           showRechargePrice={showRechargePrice}
           selectedGroup={groupFilter}
+          renderModelLink={renderModelLink}
         />
       )
     }
@@ -156,6 +182,7 @@ export function Pricing() {
         showRechargePrice={showRechargePrice}
         selectedGroup={groupFilter}
         onModelClick={handleModelClick}
+        renderModelLink={renderModelLink}
       />
     )
   }
@@ -220,6 +247,11 @@ export function Pricing() {
               )}
               className='max-w-2xl'
             />
+            <p className='text-muted-foreground max-w-2xl text-sm leading-relaxed'>
+              {t(
+                'Open a model to explore its capabilities, prices, and integration examples.'
+              )}
+            </p>
           </header>
 
           <div className='grid gap-6 xl:grid-cols-[240px_minmax(0,1fr)]'>
@@ -283,6 +315,7 @@ export function Pricing() {
           {selectedModel && (
             <ModelDetailsDrawer
               open={Boolean(selectedModel)}
+              fullPageSearch={modelGuideSearch}
               onOpenChange={(open) => {
                 if (!open) setSelectedModelName(null)
               }}

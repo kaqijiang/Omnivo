@@ -31,7 +31,7 @@ import {
   Sparkles,
   Timer,
 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
@@ -65,6 +65,7 @@ import { useSystemConfigStore } from '@/stores/system-config-store'
 
 import { DEFAULT_TOKEN_UNIT } from '../constants'
 import { useBillingTime } from '../hooks/use-billing-time'
+import { useModelPageMetadata } from '../hooks/use-model-page-metadata'
 import { usePricingData } from '../hooks/use-pricing-data'
 import type { ParsedTaskTier } from '../lib/billing-expr'
 import { formatBillingCondition } from '../lib/billing-expression/condition-display'
@@ -105,8 +106,15 @@ import type {
 import { CatalogError } from './catalog-error'
 import { DynamicPricingBreakdown } from './dynamic-pricing-breakdown'
 import { ModelBillingModeBadge } from './model-billing-mode-badge'
+import {
+  ModelDetailActions,
+  type ModelGuideSearch,
+} from './model-detail-actions'
 import { ModelDetailsApi } from './model-details-api'
 import { ModelDetailsPerformance } from './model-details-performance'
+import { ModelIntroduction, ModelQuestions } from './model-introduction'
+import { ModelOfficialPriceComparison } from './model-official-price-comparison'
+import { ModelRelatedModels } from './model-related-models'
 
 // ----------------------------------------------------------------------------
 // Local UI helpers
@@ -602,7 +610,7 @@ function ModelHeader(props: { model: PricingModel }) {
   const model = props.model
   const modelIconKey = model.icon || model.vendor_icon
   const modelIcon = modelIconKey ? getLobeIcon(modelIconKey, 20) : null
-  const description = model.description || model.vendor_description || null
+  const description = model.description || null
 
   return (
     <header className='border-border/70 mb-2 border-b pb-6'>
@@ -624,11 +632,13 @@ function ModelHeader(props: { model: PricingModel }) {
         {model.vendor_name && (
           <span className='text-muted-foreground'>{model.vendor_name}</span>
         )}
-        <span className='text-muted-foreground/30'>·</span>
+        {model.vendor_name && (
+          <span className='text-muted-foreground/30'>·</span>
+        )}
         <ModelBillingModeBadge model={model} />
       </div>
       {description && (
-        <p className='text-muted-foreground mt-4 max-w-3xl text-sm leading-relaxed'>
+        <p className='text-muted-foreground mt-4 line-clamp-3 max-w-3xl text-sm leading-relaxed [overflow-wrap:anywhere]'>
           {description}
         </p>
       )}
@@ -1469,10 +1479,16 @@ export interface ModelDetailsContentProps {
   usdExchangeRate: number
   tokenUnit: TokenUnit
   showRechargePrice?: boolean
+  actions?: React.ReactNode
 }
 
 export function ModelDetailsContent(props: ModelDetailsContentProps) {
+  return <ModelDetailsContentView key={props.model.model_name} {...props} />
+}
+
+function ModelDetailsContentView(props: ModelDetailsContentProps) {
   const { t } = useTranslation()
+  const [activeTab, setActiveTab] = useState<TabValue>('overview')
   const showRechargePrice = props.showRechargePrice ?? false
 
   const isDynamic =
@@ -1490,10 +1506,21 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
     taskTiers.length === 0
 
   return (
-    <div className='@container/details space-y-4'>
+    <div className='@container/details flex flex-col gap-5'>
       <ModelHeader model={props.model} />
+      <div className='flex flex-wrap items-center gap-2'>
+        {props.actions}
+        <Button variant='outline' size='sm' onClick={() => setActiveTab('api')}>
+          <Code2 aria-hidden='true' />
+          {t('View API examples')}
+        </Button>
+      </div>
 
-      <Tabs defaultValue='overview' className='gap-4'>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as TabValue)}
+        className='gap-4'
+      >
         <TabsList className='bg-muted/60 grid w-full grid-cols-3 gap-1 rounded-lg p-1 group-data-horizontal/tabs:h-auto'>
           {TAB_VALUES.map((value) => {
             const Icon = TAB_META[value].icon
@@ -1510,7 +1537,10 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
           })}
         </TabsList>
 
-        <TabsContent value='overview' className='space-y-6 outline-none'>
+        <TabsContent
+          value='overview'
+          className='flex flex-col gap-6 outline-none'
+        >
           <OverviewSummaryGrid model={props.model} />
 
           <section className='bg-card/60 space-y-5 rounded-xl border p-4 shadow-sm'>
@@ -1545,9 +1575,19 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
               tokenUnit={props.tokenUnit}
               showRechargePrice={showRechargePrice}
             />
+            <ModelOfficialPriceComparison
+              model={props.model}
+              groupRatio={props.groupRatio}
+              tokenUnit={props.tokenUnit}
+              showWithRecharge={showRechargePrice}
+              priceRate={props.priceRate}
+              usdExchangeRate={props.usdExchangeRate}
+            />
           </section>
 
+          <ModelIntroduction model={props.model} />
           <ModelBackendDetailsSection model={props.model} />
+          <ModelQuestions modelName={props.model.model_name} />
         </TabsContent>
 
         <TabsContent value='performance' className='outline-none'>
@@ -1572,11 +1612,12 @@ export function ModelDetailsContent(props: ModelDetailsContentProps) {
 export interface ModelDetailsDrawerProps extends ModelDetailsContentProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  fullPageSearch?: ModelGuideSearch
 }
 
 export function ModelDetailsDrawer(props: ModelDetailsDrawerProps) {
   const { t } = useTranslation()
-  const { open, onOpenChange, ...contentProps } = props
+  const { open, onOpenChange, fullPageSearch, ...contentProps } = props
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -1591,7 +1632,16 @@ export function ModelDetailsDrawer(props: ModelDetailsDrawerProps) {
           <SheetDescription>{t('Model details')}</SheetDescription>
         </SheetHeader>
         <div className='flex-1 overflow-y-auto px-4 pt-11 pb-5 sm:px-6 sm:pt-12 sm:pb-6'>
-          <ModelDetailsContent {...contentProps} />
+          <ModelDetailsContent
+            {...contentProps}
+            actions={
+              <ModelDetailActions
+                modelName={props.model.model_name}
+                showFullPageLink
+                fullPageSearch={fullPageSearch}
+              />
+            }
+          />
         </div>
       </SheetContent>
     </Sheet>
@@ -1624,6 +1674,7 @@ export function ModelDetails() {
     if (!models || !modelId) return null
     return models.find((m) => m.model_name === modelId) || null
   }, [models, modelId])
+  useModelPageMetadata(model)
 
   const handleBack = () => {
     navigate({ to: '/pricing', search })
@@ -1698,6 +1749,7 @@ export function ModelDetails() {
 
         <ModelDetailsContent
           model={model}
+          actions={<ModelDetailActions modelName={model.model_name} />}
           groupRatio={groupRatio || {}}
           usableGroup={usableGroup || {}}
           autoGroups={autoGroups || []}
@@ -1712,6 +1764,7 @@ export function ModelDetails() {
             >) || {}
           }
         />
+        <ModelRelatedModels model={model} models={models} />
       </main>
       <Footer />
     </PublicLayout>

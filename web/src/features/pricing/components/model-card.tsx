@@ -53,6 +53,7 @@ export interface ModelCardProps {
   showRechargePrice?: boolean
   selectedGroup?: string
   perf?: ModelPerfBadgeData
+  modelLink?: ReactNode
 }
 
 export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
@@ -284,7 +285,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             className='line-clamp-2 font-mono text-[15px] leading-snug font-semibold [overflow-wrap:anywhere]'
             title={props.model.model_name}
           >
-            {props.model.model_name}
+            {props.modelLink ?? props.model.model_name}
           </h3>
           {props.model.vendor_name && (
             <p

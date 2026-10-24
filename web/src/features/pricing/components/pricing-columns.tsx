@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import type { ColumnDef } from '@tanstack/react-table'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -38,7 +39,9 @@ import { ModelPriceCell, type ModelPriceCellOptions } from './model-price-cell'
 // Pricing Table Columns
 // ----------------------------------------------------------------------------
 
-export type PricingColumnsOptions = ModelPriceCellOptions
+export type PricingColumnsOptions = ModelPriceCellOptions & {
+  renderModelLink?: (modelName: string) => ReactNode
+}
 
 export function usePricingColumns(
   options: PricingColumnsOptions = {}
@@ -62,7 +65,7 @@ export function usePricingColumns(
           <div className='flex max-w-full min-w-0 items-center gap-2'>
             {modelIcon}
             <span className='truncate font-mono text-sm font-medium'>
-              {model.model_name}
+              {options.renderModelLink?.(model.model_name) ?? model.model_name}
             </span>
           </div>
         )

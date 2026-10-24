@@ -20,6 +20,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useCallback } from 'react'
 
 import { DEFAULT_LOGO } from '@/lib/constants'
+import { setDefaultDocumentTitle } from '@/lib/document-title'
 import { applyFaviconToDom } from '@/lib/dom-utils'
 import { resolveSiteBrand } from '@/lib/omnivo-brand'
 import { ensureStatus } from '@/lib/status-query'
@@ -111,7 +112,9 @@ export function useSystemConfig(options: UseSystemConfigOptions = {}) {
   }, [brand.logo, loadedLogoUrl, setLoadedLogoUrl])
 
   useEffect(() => {
-    if (autoLoad) document.title = `${brand.systemName} · Many models. One API.`
+    if (autoLoad) {
+      setDefaultDocumentTitle(`${brand.systemName} · Many models. One API.`)
+    }
   }, [autoLoad, brand.systemName])
 
   return {
