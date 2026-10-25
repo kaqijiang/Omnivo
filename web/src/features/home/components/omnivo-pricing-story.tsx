@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
-import { ArrowUpRight, BadgeCheck, Scale, Wallet } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import {
@@ -26,6 +26,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 import { useHomeCatalogAccess } from '../hooks/use-home-catalog-access'
@@ -33,55 +34,33 @@ import { useHomeCatalogAccess } from '../hooks/use-home-catalog-access'
 export function OmnivoPricingStory() {
   const { t } = useTranslation()
   const access = useHomeCatalogAccess()
-  const comparisons = [
-    {
-      icon: Scale,
-      title: t('Compare the same usage'),
-      description: t(
-        'Input, output, and cache usage have their own prices. Compare the same model, unit, and billing conditions.'
-      ),
-    },
-    {
-      icon: BadgeCheck,
-      title: t('See where savings come from'),
-      description: t(
-        'When an official reference is available, compare the Omnivo rate with the provider’s standard API price.'
-      ),
-    },
-    {
-      icon: Wallet,
-      title: t('Choose with the current price'),
-      description: t(
-        'Check the model page for current rates and any billing tiers before you build.'
-      ),
-    },
-  ]
+
   return (
     <section
       aria-labelledby='omnivo-pricing-story-title'
-      className='mx-auto max-w-7xl px-6 md:px-10'
+      className='mx-auto max-w-6xl px-5 sm:px-8'
     >
-      <div className='bg-muted/40 border-border grid gap-10 rounded-3xl border px-7 py-10 md:px-12 md:py-14 lg:grid-cols-[1fr_1.1fr] lg:gap-16'>
-        <div>
-          <p className='text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase'>
-            {t('A clearer view of your AI costs')}
+      <div className='omnivo-inverse bg-background text-foreground border-border grid gap-10 rounded-2xl border px-6 py-9 md:p-10 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:gap-14 lg:p-12'>
+        <div className='min-w-0'>
+          <p className='text-primary text-xs font-medium tracking-[0.16em] uppercase'>
+            {t('More room to build')}
           </p>
           <h2
             id='omnivo-pricing-story-title'
-            className='mt-4 max-w-md text-3xl leading-tight font-semibold tracking-tight md:text-4xl'
+            className='mt-4 max-w-md scroll-mt-24 text-3xl leading-[1.15] font-semibold tracking-tight text-balance md:text-4xl'
           >
-            {t('Know the price before your first request.')}
+            {t('Make your AI budget go further.')}
           </h2>
-          <p className='text-muted-foreground mt-5 max-w-md text-sm leading-7'>
+          <p className='text-muted-foreground mt-5 max-w-sm text-sm leading-7'>
             {t(
-              'Compare models by what you need and what you pay. Clear units and official references help you make an informed choice.'
+              'Compare model prices with official reference rates, so you can choose where your budget goes.'
             )}
           </p>
           {access.ready && access.enabled && (
             <Button
               role='link'
-              variant='outline'
-              className='mt-7 rounded-full px-5'
+              size='lg'
+              className='mt-7 h-10 px-4'
               render={<Link to='/pricing' search={{ tokenUnit: 'M' }} />}
             >
               {t('Compare model prices')}
@@ -89,22 +68,54 @@ export function OmnivoPricingStory() {
             </Button>
           )}
         </div>
-        <dl className='flex flex-col gap-7'>
-          {comparisons.map((comparison) => (
-            <div key={comparison.title} className='flex gap-4'>
-              <comparison.icon
+        <figure
+          aria-labelledby='omnivo-savings-example-title'
+          aria-describedby='omnivo-savings-example-note'
+          className='bg-card/60 border-border min-w-0 rounded-xl border p-5 md:p-6'
+        >
+          <Badge id='omnivo-savings-example-title' variant='secondary'>
+            {t('20% savings example')}
+          </Badge>
+          <div className='mt-7 flex flex-col gap-6'>
+            <div>
+              <div className='flex items-baseline justify-between gap-4'>
+                <p className='text-muted-foreground text-sm'>
+                  {t('Provider standard price')}
+                </p>
+                <span className='font-mono text-sm tabular-nums'>100%</span>
+              </div>
+              <div
                 aria-hidden='true'
-                className='text-primary mt-0.5 size-5 shrink-0'
+                className='bg-foreground/25 mt-3 h-3 w-full rounded-sm'
               />
-              <div>
-                <dt className='font-medium'>{comparison.title}</dt>
-                <dd className='text-muted-foreground mt-2 text-sm leading-7'>
-                  {comparison.description}
-                </dd>
+            </div>
+            <div>
+              <div className='flex items-baseline justify-between gap-4'>
+                <p className='text-sm font-medium'>
+                  {t('Omnivo in this example')}
+                </p>
+                <span className='text-primary font-mono text-3xl font-semibold tracking-tight tabular-nums'>
+                  80%
+                </span>
+              </div>
+              <div aria-hidden='true' className='mt-3 flex h-3'>
+                <div className='bg-primary w-4/5 rounded-l-sm' />
+                <div className='border-primary/50 w-1/5 rounded-r-sm border border-l-0 border-dashed' />
               </div>
             </div>
-          ))}
-        </dl>
+          </div>
+          <p className='text-primary mt-4 text-right text-xs font-medium'>
+            {t('20% left for your next idea')}
+          </p>
+          <figcaption
+            id='omnivo-savings-example-note'
+            className='text-muted-foreground mt-6 text-xs leading-6'
+          >
+            {t(
+              'Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.'
+            )}
+          </figcaption>
+        </figure>
       </div>
     </section>
   )
@@ -142,7 +153,7 @@ export function OmnivoFaq() {
   return (
     <section
       aria-labelledby='omnivo-faq-title'
-      className='mx-auto grid max-w-7xl gap-8 px-6 pt-20 md:px-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16 lg:pt-24'
+      className='mx-auto grid max-w-6xl gap-7 px-5 pt-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-14 lg:pt-20'
     >
       <div>
         <p className='text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase'>
@@ -158,10 +169,10 @@ export function OmnivoFaq() {
       <Accordion>
         {questions.map((question) => (
           <AccordionItem key={question.question} value={question.question}>
-            <AccordionTrigger className='py-5'>
+            <AccordionTrigger className='gap-5 py-4'>
               {question.question}
             </AccordionTrigger>
-            <AccordionContent className='text-muted-foreground pb-5 leading-7'>
+            <AccordionContent className='text-muted-foreground pb-4 leading-7'>
               {question.answer}
             </AccordionContent>
           </AccordionItem>

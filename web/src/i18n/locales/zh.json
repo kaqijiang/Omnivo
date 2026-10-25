@@ -7525,6 +7525,22 @@
     "View official pricing source": "查看官网价格来源",
     "per 1K tokens": "每千 token",
     "per 1M tokens": "每百万 token",
-    "{{percent}}% higher": "贵 {{percent}}%"
+    "{{percent}}% higher": "贵 {{percent}}%",
+    "20% left for your next idea": "省下 20%，留给下一个创意",
+    "20% savings example": "8 折示例 · 节省 20%",
+    "Base catalog prices shown. Your account group and usage can affect the final price.": "此处显示基础目录价，实际费用还取决于账户分组与用量。",
+    "Choose your model. Find your price. Start building.": "选好模型，了解价格，开始构建。",
+    "Compare capabilities, pricing, and API examples in one place.": "在同一处比较模型能力、价格与接入示例。",
+    "Compare model prices with official reference rates, so you can choose where your budget goes.": "对照官方参考价比较模型价格，让每一份预算花得更明白。",
+    "Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.": "仅为示例。实际折扣请按模型，将输入、输出价格分别与官方参考价核验。",
+    "Explore AI models in one place. Keep your favorite tools, compare prices, and make more of your AI budget.": "一站探索多种 AI 模型，沿用熟悉的工具，比较价格，让预算用得更值。",
+    "Fits your existing stack": "兼容熟悉的开发工具",
+    "Make your AI budget go further.": "让 AI 预算走得更远。",
+    "More room to build": "让创造多一些空间",
+    "Omnivo in this example": "Omnivo 示例价格",
+    "One connection. Better value.": "一次接入，更多实惠。",
+    "Provider standard price": "供应商官网标准价",
+    "Your next idea starts with one API.": "下一个创意，从一个 API 开始。",
+    "Your tools. Your workflow. One connection.": "沿用你的工具，连接更多可能。"
   }
 }

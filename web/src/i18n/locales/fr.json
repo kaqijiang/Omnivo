@@ -7525,6 +7525,22 @@
     "View official pricing source": "Consulter la source des tarifs officiels",
     "per 1K tokens": "pour 1 000 tokens",
     "per 1M tokens": "pour 1 million de tokens",
-    "{{percent}}% higher": "{{percent}} % plus cher"
+    "{{percent}}% higher": "{{percent}} % plus cher",
+    "20% left for your next idea": "20 % économisés pour votre prochaine idée",
+    "20% savings example": "Exemple : 20 % d’économies",
+    "Base catalog prices shown. Your account group and usage can affect the final price.": "Les tarifs de base du catalogue sont affichés. Le groupe de votre compte et votre utilisation peuvent modifier le prix final.",
+    "Choose your model. Find your price. Start building.": "Choisissez votre modèle. Trouvez votre tarif. Créez.",
+    "Compare capabilities, pricing, and API examples in one place.": "Comparez les fonctionnalités, les tarifs et les exemples d’API au même endroit.",
+    "Compare model prices with official reference rates, so you can choose where your budget goes.": "Comparez les prix des modèles aux tarifs officiels de référence pour mieux répartir votre budget.",
+    "Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.": "Exemple uniquement. Comparez les tarifs d’entrée et de sortie de chaque modèle aux tarifs officiels de référence pour vérifier la remise réelle.",
+    "Explore AI models in one place. Keep your favorite tools, compare prices, and make more of your AI budget.": "Explorez les modèles d’IA au même endroit. Gardez vos outils préférés, comparez les prix et faites plus avec votre budget IA.",
+    "Fits your existing stack": "S’intègre à vos outils",
+    "Make your AI budget go further.": "Faites plus avec votre budget IA.",
+    "More room to build": "Plus de liberté pour créer",
+    "Omnivo in this example": "Omnivo dans cet exemple",
+    "One connection. Better value.": "Une connexion. Plus pour votre budget.",
+    "Provider standard price": "Tarif standard du fournisseur",
+    "Your next idea starts with one API.": "Votre prochaine idée commence par une API.",
+    "Your tools. Your workflow. One connection.": "Vos outils. Votre façon de travailler. Une seule connexion."
   }
 }

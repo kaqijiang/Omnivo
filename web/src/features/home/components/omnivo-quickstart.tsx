@@ -22,6 +22,8 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 
+import { OmnivoCodeSample } from './omnivo-code-sample'
+
 export function OmnivoQuickstart() {
   const { t } = useTranslation()
 
@@ -52,46 +54,52 @@ export function OmnivoQuickstart() {
   return (
     <section
       aria-labelledby='omnivo-start-title'
-      className='mx-auto max-w-7xl px-6 py-20 md:px-10 lg:py-28'
+      className='mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-2 lg:gap-16'
     >
-      <div className='flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end'>
-        <div className='max-w-xl'>
-          <p className='text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase'>
-            {t('From idea to API')}
-          </p>
-          <h2
-            id='omnivo-start-title'
-            className='mt-4 text-3xl leading-tight font-semibold tracking-tight md:text-4xl'
-          >
-            {t('Your next build starts here.')}
-          </h2>
-        </div>
+      <div>
+        <p className='text-primary text-xs font-medium tracking-wide'>
+          {t('From idea to API')}
+        </p>
+        <h2
+          id='omnivo-start-title'
+          className='mt-3 text-3xl leading-tight font-semibold tracking-tight sm:text-4xl'
+        >
+          {t('Your tools. Your workflow. One connection.')}
+        </h2>
+        <p className='text-muted-foreground mt-4 max-w-md text-sm leading-7'>
+          {t(
+            'Use OpenAI-compatible clients and connect through a single API base URL.'
+          )}
+        </p>
+        <ol className='mt-7 flex flex-col gap-5'>
+          {steps.map((step) => (
+            <li key={step.number} className='flex gap-4'>
+              <span
+                aria-hidden='true'
+                className='text-muted-foreground pt-0.5 font-mono text-xs'
+              >
+                {step.number}
+              </span>
+              <div>
+                <h3 className='text-sm font-semibold'>{step.title}</h3>
+                <p className='text-muted-foreground mt-1 max-w-sm text-sm leading-6'>
+                  {step.description}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
         <Button
           role='link'
           variant='outline'
-          size='lg'
-          className='h-11 rounded-full px-5'
+          className='mt-7 rounded-lg px-4'
           render={<Link to='/docs' />}
         >
           {t('Read the quickstart')}
           <ArrowUpRight aria-hidden='true' />
         </Button>
       </div>
-      <ol className='mt-12 grid gap-10 md:grid-cols-3 md:gap-8'>
-        {steps.map((step) => (
-          <li key={step.number} className='border-border border-t pt-6'>
-            <span aria-hidden='true' className='text-primary font-mono text-sm'>
-              {step.number}
-            </span>
-            <h3 className='mt-6 text-xl font-semibold tracking-tight'>
-              {step.title}
-            </h3>
-            <p className='text-muted-foreground mt-3 max-w-sm text-sm leading-7'>
-              {step.description}
-            </p>
-          </li>
-        ))}
-      </ol>
+      <OmnivoCodeSample />
     </section>
   )
 }

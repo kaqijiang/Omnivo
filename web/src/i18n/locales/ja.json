@@ -7525,6 +7525,22 @@
     "View official pricing source": "公式料金の出典を見る",
     "per 1K tokens": "1,000 トークンあたり",
     "per 1M tokens": "100 万トークンあたり",
-    "{{percent}}% higher": "{{percent}}% 高い"
+    "{{percent}}% higher": "{{percent}}% 高い",
+    "20% left for your next idea": "20% を次のアイデアに",
+    "20% savings example": "20% 削減の例",
+    "Base catalog prices shown. Your account group and usage can affect the final price.": "表示はカタログの基本料金です。実際の料金はアカウントのグループや使用量によって異なる場合があります。",
+    "Choose your model. Find your price. Start building.": "モデルを選び、料金を確かめ、開発を始めましょう。",
+    "Compare capabilities, pricing, and API examples in one place.": "モデルの機能、料金、API の使用例を一か所で比較。",
+    "Compare model prices with official reference rates, so you can choose where your budget goes.": "モデル料金を公式の参考料金と比較し、予算の使い方を選びましょう。",
+    "Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.": "これは例です。実際の割引率は、各モデルの入力・出力料金をそれぞれ公式の参考料金と比較してご確認ください。",
+    "Explore AI models in one place. Keep your favorite tools, compare prices, and make more of your AI budget.": "さまざまな AI モデルを一か所で。使い慣れたツールはそのままに、料金を比較して AI 予算を有効に活用しましょう。",
+    "Fits your existing stack": "使い慣れた開発環境に対応",
+    "Make your AI budget go further.": "AI 予算を、もっと有効に。",
+    "More room to build": "開発の可能性を、もっと広げる",
+    "Omnivo in this example": "この例での Omnivo 料金",
+    "One connection. Better value.": "ひとつの接続で、もっとお得に。",
+    "Provider standard price": "提供元の標準料金",
+    "Your next idea starts with one API.": "次のアイデアは、ひとつの API から。",
+    "Your tools. Your workflow. One connection.": "いつものツール、いつものワークフロー。接続はひとつ。"
   }
 }

@@ -7525,6 +7525,22 @@
     "View official pricing source": "查看官網價格來源",
     "per 1K tokens": "每千 token",
     "per 1M tokens": "每百萬 token",
-    "{{percent}}% higher": "貴 {{percent}}%"
+    "{{percent}}% higher": "貴 {{percent}}%",
+    "20% left for your next idea": "省下 20%，留給下一個創意",
+    "20% savings example": "8 折範例 · 節省 20%",
+    "Base catalog prices shown. Your account group and usage can affect the final price.": "此處顯示基本目錄價格，實際費用還取決於帳戶群組與用量。",
+    "Choose your model. Find your price. Start building.": "選好模型，了解價格，開始打造。",
+    "Compare capabilities, pricing, and API examples in one place.": "在同一處比較模型能力、價格與接入範例。",
+    "Compare model prices with official reference rates, so you can choose where your budget goes.": "對照官方參考價比較模型價格，讓每一份預算花得更明白。",
+    "Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.": "僅為範例。實際折扣請依模型，將輸入、輸出價格分別與官方參考價核對。",
+    "Explore AI models in one place. Keep your favorite tools, compare prices, and make more of your AI budget.": "一站探索多種 AI 模型，沿用熟悉的工具，比較價格，讓預算用得更值。",
+    "Fits your existing stack": "相容於熟悉的開發工具",
+    "Make your AI budget go further.": "讓 AI 預算走得更遠。",
+    "More room to build": "讓創造多一些空間",
+    "Omnivo in this example": "Omnivo 範例價格",
+    "One connection. Better value.": "一次接入，更多實惠。",
+    "Provider standard price": "供應商官網標準價",
+    "Your next idea starts with one API.": "下一個創意，從一個 API 開始。",
+    "Your tools. Your workflow. One connection.": "沿用你的工具，連結更多可能。"
   }
 }

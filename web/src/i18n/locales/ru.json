@@ -7525,6 +7525,22 @@
     "View official pricing source": "Открыть официальный источник цен",
     "per 1K tokens": "за 1 тыс. токенов",
     "per 1M tokens": "за 1 млн токенов",
-    "{{percent}}% higher": "Дороже на {{percent}}%"
+    "{{percent}}% higher": "Дороже на {{percent}}%",
+    "20% left for your next idea": "Сэкономленные 20 % — на следующую идею",
+    "20% savings example": "Пример экономии 20 %",
+    "Base catalog prices shown. Your account group and usage can affect the final price.": "Указаны базовые цены каталога. Группа аккаунта и использование могут влиять на итоговую цену.",
+    "Choose your model. Find your price. Start building.": "Выберите модель. Найдите свой тариф. Начните создавать.",
+    "Compare capabilities, pricing, and API examples in one place.": "Сравнивайте возможности, цены и примеры API в одном месте.",
+    "Compare model prices with official reference rates, so you can choose where your budget goes.": "Сравнивайте цены моделей с официальными справочными тарифами и решайте, как распределить бюджет.",
+    "Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.": "Это лишь пример. Сравните тарифы на входные и выходные данные каждой модели с официальными справочными тарифами, чтобы проверить фактическую скидку.",
+    "Explore AI models in one place. Keep your favorite tools, compare prices, and make more of your AI budget.": "Изучайте модели ИИ в одном месте. Пользуйтесь любимыми инструментами, сравнивайте цены и получайте больше от своего бюджета на ИИ.",
+    "Fits your existing stack": "Работает с вашим стеком",
+    "Make your AI budget go further.": "Больше пользы от вашего бюджета на ИИ.",
+    "More room to build": "Больше возможностей для ваших идей",
+    "Omnivo in this example": "Omnivo в этом примере",
+    "One connection. Better value.": "Одно подключение. Больше выгоды.",
+    "Provider standard price": "Стандартная цена поставщика",
+    "Your next idea starts with one API.": "Ваша следующая идея начинается с одного API.",
+    "Your tools. Your workflow. One connection.": "Ваши инструменты. Ваш рабочий процесс. Одно подключение."
   }
 }

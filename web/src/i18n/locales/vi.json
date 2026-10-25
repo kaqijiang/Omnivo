@@ -7525,6 +7525,22 @@
     "View official pricing source": "Xem nguồn giá chính thức",
     "per 1K tokens": "cho mỗi 1 nghìn token",
     "per 1M tokens": "cho mỗi 1 triệu token",
-    "{{percent}}% higher": "Cao hơn {{percent}}%"
+    "{{percent}}% higher": "Cao hơn {{percent}}%",
+    "20% left for your next idea": "Dành 20% cho ý tưởng tiếp theo",
+    "20% savings example": "Ví dụ tiết kiệm 20%",
+    "Base catalog prices shown. Your account group and usage can affect the final price.": "Đây là giá cơ bản trong danh mục. Nhóm tài khoản và mức sử dụng có thể ảnh hưởng đến giá cuối cùng.",
+    "Choose your model. Find your price. Start building.": "Chọn mô hình. Xem mức giá. Bắt đầu xây dựng.",
+    "Compare capabilities, pricing, and API examples in one place.": "So sánh tính năng, giá và ví dụ sử dụng API tại một nơi.",
+    "Compare model prices with official reference rates, so you can choose where your budget goes.": "So sánh giá mô hình với giá tham chiếu chính thức để chủ động phân bổ ngân sách.",
+    "Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.": "Chỉ là ví dụ. Hãy so sánh riêng giá đầu vào và đầu ra của từng mô hình với giá tham chiếu chính thức để xác nhận mức giảm thực tế.",
+    "Explore AI models in one place. Keep your favorite tools, compare prices, and make more of your AI budget.": "Khám phá các mô hình AI tại một nơi. Tiếp tục dùng công cụ quen thuộc, so sánh giá và tận dụng tốt hơn ngân sách AI.",
+    "Fits your existing stack": "Tương thích với bộ công cụ hiện có",
+    "Make your AI budget go further.": "Tận dụng tối đa ngân sách AI.",
+    "More room to build": "Thêm dư địa để sáng tạo",
+    "Omnivo in this example": "Giá Omnivo trong ví dụ này",
+    "One connection. Better value.": "Một kết nối. Nhiều giá trị hơn.",
+    "Provider standard price": "Giá tiêu chuẩn của nhà cung cấp",
+    "Your next idea starts with one API.": "Ý tưởng tiếp theo bắt đầu từ một API.",
+    "Your tools. Your workflow. One connection.": "Công cụ của bạn. Quy trình của bạn. Một kết nối."
   }
 }

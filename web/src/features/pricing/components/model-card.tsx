@@ -54,6 +54,7 @@ export interface ModelCardProps {
   selectedGroup?: string
   perf?: ModelPerfBadgeData
   modelLink?: ReactNode
+  compact?: boolean
 }
 
 export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
@@ -267,8 +268,25 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
     )
   }
 
+  const detailsButton = (
+    <Button
+      variant='ghost'
+      size='sm'
+      onClick={() => props.onClick(props.model.model_name || '')}
+    >
+      {t('Details')}
+      <ChevronRight aria-hidden className='size-3.5' />
+    </Button>
+  )
+
   return (
-    <Card className='hover:ring-primary/30 h-full min-w-0 gap-4 rounded-2xl transition-colors'>
+    <Card
+      size={props.compact ? 'sm' : 'default'}
+      className={cn(
+        'hover:ring-primary/30 h-full min-w-0 gap-4 transition-colors',
+        props.compact ? 'rounded-xl' : 'rounded-2xl'
+      )}
+    >
       <CardHeader className='flex flex-row items-start gap-3'>
         <div
           aria-hidden
@@ -308,7 +326,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
           <p className='text-muted-foreground line-clamp-2 text-[13px] leading-5 break-words'>
             {props.model.description || t('No description available.')}
           </p>
-          {tags.length > 0 && (
+          {!props.compact && tags.length > 0 && (
             <div
               role='group'
               aria-label={t('Tags')}
@@ -345,7 +363,7 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
             {priceSummary}
           </div>
         </div>
-        {(groups.length > 0 || endpoints.length > 0) && (
+        {!props.compact && (groups.length > 0 || endpoints.length > 0) && (
           <dl
             className={cn(
               'grid min-w-0 grid-cols-2 gap-3 text-xs',
@@ -395,20 +413,22 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
           </dl>
         )}
       </CardContent>
-      <CardFooter className='mt-auto border-0 bg-transparent pt-0'>
-        <ModelPerfBadge
-          perf={props.perf}
-          className='border-border/60 border-t pt-2'
-        >
-          <Button
-            variant='ghost'
-            size='sm'
-            onClick={() => props.onClick(props.model.model_name || '')}
+      <CardFooter
+        className={cn(
+          'mt-auto border-0 bg-transparent pt-0',
+          props.compact && 'justify-end group-data-[size=sm]/card:pt-0'
+        )}
+      >
+        {props.compact ? (
+          detailsButton
+        ) : (
+          <ModelPerfBadge
+            perf={props.perf}
+            className='border-border/60 border-t pt-2'
           >
-            {t('Details')}
-            <ChevronRight aria-hidden className='size-3.5' />
-          </Button>
-        </ModelPerfBadge>
+            {detailsButton}
+          </ModelPerfBadge>
+        )}
       </CardFooter>
     </Card>
   )

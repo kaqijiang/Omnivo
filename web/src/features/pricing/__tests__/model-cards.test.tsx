@@ -88,6 +88,66 @@ afterEach(() => {
 })
 
 describe('model cards', () => {
+  it('keeps model pricing and browsing actions in compact mode without technical metadata or performance placeholders', async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    const name = 'provider/compact-model'
+    render(
+      <ModelCard
+        compact
+        model={pricingModel({
+          model_name: name,
+          vendor_name: 'Example Provider',
+          description: 'General-purpose text generation.',
+          tags: 'text,reasoning',
+          supported_endpoint_types: ['openai'],
+          cache_ratio: 0,
+        })}
+        modelLink={<a href='/pricing/provider%2Fcompact-model'>{name}</a>}
+        onClick={onClick}
+        tokenUnit='K'
+        selectedGroup='premium'
+        showRechargePrice
+        priceRate={3}
+        usdExchangeRate={6}
+      />
+    )
+
+    expect(screen.getByRole('link', { name })).toHaveAttribute(
+      'href',
+      '/pricing/provider%2Fcompact-model'
+    )
+    expect(screen.getByText('Example Provider')).toBeVisible()
+    expect(screen.getByText('General-purpose text generation.')).toBeVisible()
+    const pricing = screen.getByRole('group', { name: 'Pricing' })
+    expect(within(pricing).getByText('Token-based')).toBeVisible()
+    expect(within(pricing).getByText('Input').parentElement).toHaveTextContent(
+      /\$0.003\s*\/\s*1K/
+    )
+    expect(within(pricing).getByText('Output').parentElement).toHaveTextContent(
+      /\$0.009\s*\/\s*1K/
+    )
+    expect(within(pricing).getByText('Cached').parentElement).toHaveTextContent(
+      /\$0\s*\/\s*1K/
+    )
+    expect(
+      screen.queryByRole('group', { name: 'Tags' })
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText('Groups')).not.toBeInTheDocument()
+    expect(screen.queryByText('Endpoints')).not.toBeInTheDocument()
+    expect(
+      screen.queryByLabelText('Performance metrics for the last 24 hours')
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText(/^—/)).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Copy model name' }))
+    expect(await navigator.clipboard.readText()).toBe(name)
+    expect(onClick).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Details' }))
+    expect(onClick).toHaveBeenCalledOnce()
+    expect(onClick).toHaveBeenCalledWith(name)
+  })
+
   it('offers a full model link while keeping quick details as a separate action', async () => {
     const user = userEvent.setup()
     const onClick = vi.fn()

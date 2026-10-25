@@ -20,7 +20,6 @@ import { Terminal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { CopyButton } from '@/components/copy-button'
-import { Separator } from '@/components/ui/separator'
 
 const exampleRequest = String.raw`curl "$OMNIVO_BASE_URL/chat/completions" \
   -H "Authorization: Bearer $OMNIVO_API_KEY" \
@@ -36,24 +35,8 @@ export function OmnivoCodeSample() {
   const { t } = useTranslation()
 
   return (
-    <div className='omnivo-inverse bg-background text-foreground border-border overflow-hidden rounded-3xl border shadow-xl'>
-      <div
-        aria-hidden='true'
-        className='relative flex h-36 items-center justify-center overflow-hidden sm:h-44'
-      >
-        <div className='border-primary/15 absolute size-72 rounded-full border' />
-        <div className='border-primary/15 absolute size-48 rounded-full border' />
-        <div className='border-primary/15 absolute size-24 rounded-full border' />
-        <span className='bg-background text-muted-foreground border-border absolute left-6 rounded-full border px-3 py-1 font-mono text-[11px]'>
-          messages
-        </span>
-        <span className='bg-background text-muted-foreground border-border absolute right-6 rounded-full border px-3 py-1 font-mono text-[11px]'>
-          responses
-        </span>
-        <img src='/omnivo-mark.svg' alt='' className='relative size-20' />
-      </div>
-      <Separator />
-      <div className='flex items-center justify-between gap-3 px-5 py-3'>
+    <div className='omnivo-inverse bg-background text-foreground border-border min-w-0 overflow-hidden rounded-xl border shadow-sm'>
+      <div className='border-border flex items-center justify-between gap-3 border-b px-5 py-3'>
         <div className='text-muted-foreground flex items-center gap-2 font-mono text-xs'>
           <Terminal aria-hidden='true' className='size-4' />
           <span>{t('Your first request')}</span>
@@ -69,7 +52,7 @@ export function OmnivoCodeSample() {
       <pre
         tabIndex={0}
         aria-label={t('Example API request')}
-        className='text-primary overflow-x-auto px-5 pb-6 font-mono text-[11px] leading-7 outline-offset-[-3px] sm:text-xs'
+        className='text-primary overflow-x-auto px-5 py-6 font-mono text-[11px] leading-7 outline-offset-[-3px] sm:text-xs'
       >
         <code>{exampleRequest}</code>
       </pre>

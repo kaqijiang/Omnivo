@@ -94,3 +94,17 @@ For commercial licensing, please contact support@quantumnous.com
   --input: #34564d;
   --ring: var(--omnivo-mint);
 }
+
+/* A restrained wash behind the homepage; explicit theme colors still apply. */
+.omnivo-home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    color-mix(in oklch, var(--primary) 8%, transparent),
+    transparent 65%
+  );
+}

@@ -38,7 +38,7 @@ export function OmnivoModelSearch() {
     <form
       role='search'
       aria-label={t('Find your next model')}
-      className='mt-8 flex max-w-xl flex-col gap-3 sm:flex-row'
+      className='mt-8 flex w-full max-w-2xl flex-col gap-2 sm:flex-row'
       onSubmit={(event) => {
         event.preventDefault()
         void navigate({
@@ -54,7 +54,7 @@ export function OmnivoModelSearch() {
         placeholder={t('Search by model name or provider')}
         className='min-w-0 flex-1'
       />
-      <Button type='submit' size='lg' className='h-12 px-5'>
+      <Button type='submit' size='lg' className='h-12 rounded-lg px-5'>
         {t('Find models')}
         <ArrowRight aria-hidden='true' />
       </Button>

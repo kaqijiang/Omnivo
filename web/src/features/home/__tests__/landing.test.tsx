@@ -24,7 +24,7 @@ import {
   createRouter,
   RouterProvider,
 } from '@tanstack/react-router'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
@@ -339,7 +339,7 @@ test('a disabled catalog hides discovery and search without requesting prices', 
   expect(screen.queryByRole('search')).not.toBeInTheDocument()
   expect(
     screen.queryByRole('heading', {
-      name: 'Find the right model for your next idea.',
+      name: 'Find your next model.',
     })
   ).not.toBeInTheDocument()
   expect(
@@ -399,4 +399,40 @@ test('the discount FAQ opens with the keyboard and explains savings without clai
       'A 20% saving means paying 80% of the provider’s standard API price for the same usage. Input and output discounts can differ; use the comparison on each model page.'
     )
   ).toBeVisible()
+})
+
+test('model names are direct guide links while catalog prices keep their group context', async () => {
+  vi.mocked(pricingApi.getPricing).mockResolvedValue({
+    ...catalog,
+    data: [model],
+  })
+  renderLanding()
+
+  expect(
+    await screen.findByRole('link', { name: model.model_name })
+  ).toHaveAttribute('href', '/pricing/provider%2Ffixture-model?tokenUnit=M')
+  expect(
+    screen.getByText(
+      'Base catalog prices shown. Your account group and usage can affect the final price.'
+    )
+  ).toBeVisible()
+})
+
+test('the prominent savings graphic identifies an example and links to actual model prices', async () => {
+  renderLanding()
+  const example = await screen.findByRole('figure', {
+    name: '20% savings example',
+  })
+
+  expect(within(example).getByText('100%')).toBeVisible()
+  expect(within(example).getByText('80%')).toBeVisible()
+  expect(example).toHaveAccessibleDescription(
+    'Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.'
+  )
+  expect(
+    screen.getByRole('link', { name: 'Compare model prices' })
+  ).toHaveAttribute('href', '/pricing?tokenUnit=M')
+  expect(
+    screen.getByRole('link', { name: 'One connection. Better value.' })
+  ).toHaveAttribute('href', '/#omnivo-pricing-story-title')
 })

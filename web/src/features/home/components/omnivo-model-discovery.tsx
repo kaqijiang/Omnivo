@@ -67,23 +67,41 @@ function AvailableModels() {
   }
 
   return (
-    <div className='grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3'>
-      {models.slice(0, 3).map((model) => (
-        <ModelCard
-          key={model.model_name}
-          model={model}
-          priceRate={priceRate}
-          usdExchangeRate={usdExchangeRate}
-          tokenUnit='M'
-          onClick={(modelId) =>
-            void navigate({
-              to: '/pricing/$modelId',
-              params: { modelId },
-              search: { tokenUnit: 'M' },
-            })
-          }
-        />
-      ))}
+    <div className='flex min-w-0 flex-col gap-4'>
+      <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+        {models.slice(0, 3).map((model) => (
+          <ModelCard
+            key={model.model_name}
+            model={model}
+            compact
+            modelLink={
+              <Link
+                to='/pricing/$modelId'
+                params={{ modelId: model.model_name }}
+                search={{ tokenUnit: 'M' }}
+                className='hover:text-primary rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2'
+              >
+                {model.model_name}
+              </Link>
+            }
+            priceRate={priceRate}
+            usdExchangeRate={usdExchangeRate}
+            tokenUnit='M'
+            onClick={(modelId) =>
+              void navigate({
+                to: '/pricing/$modelId',
+                params: { modelId },
+                search: { tokenUnit: 'M' },
+              })
+            }
+          />
+        ))}
+      </div>
+      <p className='text-muted-foreground text-xs leading-5'>
+        {t(
+          'Base catalog prices shown. Your account group and usage can affect the final price.'
+        )}
+      </p>
     </div>
   )
 }
@@ -133,30 +151,25 @@ export function OmnivoModelDiscovery(props: { isAuthenticated: boolean }) {
   return (
     <section
       aria-labelledby='omnivo-discovery-title'
-      className='mx-auto max-w-7xl px-6 py-20 md:px-10 lg:py-24'
+      className='mx-auto max-w-6xl px-5 pt-4 pb-14 sm:px-8 sm:pt-6 sm:pb-16'
     >
-      <div className='mb-9 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between'>
+      <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between'>
         <div className='max-w-2xl'>
-          <p className='text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase'>
-            {t('Explore the possibilities')}
-          </p>
           <h2
             id='omnivo-discovery-title'
-            className='mt-4 text-3xl leading-tight font-semibold tracking-tight md:text-4xl'
+            className='text-2xl leading-tight font-semibold tracking-tight sm:text-3xl'
           >
-            {t('Find the right model for your next idea.')}
+            {t('Find your next model.')}
           </h2>
-          <p className='text-muted-foreground mt-4 max-w-xl text-sm leading-7'>
-            {t(
-              'Explore available models, compare their prices, and open a model guide before your first request.'
-            )}
+          <p className='text-muted-foreground mt-2 max-w-xl text-sm leading-6'>
+            {t('Compare capabilities, pricing, and API examples in one place.')}
           </p>
         </div>
         {access.ready && access.enabled && (
           <Button
             role='link'
             variant='outline'
-            className='self-start rounded-full px-5 sm:self-auto'
+            className='self-start rounded-lg px-4 sm:self-auto'
             render={<Link to='/pricing' search={{ tokenUnit: 'M' }} />}
           >
             {t('Browse all models')}
