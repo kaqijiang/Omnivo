@@ -7541,6 +7541,17 @@
     "One connection. Better value.": "一次接入，更多实惠。",
     "Provider standard price": "供应商官网标准价",
     "Your next idea starts with one API.": "下一个创意，从一个 API 开始。",
-    "Your tools. Your workflow. One connection.": "沿用你的工具，连接更多可能。"
+    "Your tools. Your workflow. One connection.": "沿用你的工具，连接更多可能。",
+    "Current model pricing": "当前模型报价",
+    "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.": "折扣按同一模型、同等用量的 Omnivo 当前售价与供应商官网标准价计算。输入、输出的优惠可能不同，也会随价格变化。",
+    "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.": "不同模型和计费项目的优惠有所不同。查看模型目录，了解当前价格及可用的官网价格对比。",
+    "Explore current model prices": "查看当前模型报价",
+    "Loading current price comparison...": "正在加载当前价格对比……",
+    "Model prices and discounts can change. Check the current rate before you start.": "模型价格和优惠会随报价调整，开始使用前请查看当前价格。",
+    "Refresh to see the latest available prices.": "请刷新以查看最新可用报价。",
+    "Unable to load current prices": "暂时无法加载当前价格",
+    "For this model in group:": "适用于此模型的分组：",
+    "Half the official price, or less.": "精选模型，低至官网 5 折",
+    "Half-price model offer": "半价模型优惠"
   }
 }

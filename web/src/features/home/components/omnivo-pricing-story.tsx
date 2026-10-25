@@ -20,20 +20,41 @@ import { Link } from '@tanstack/react-router'
 import { ArrowUpRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { ErrorState } from '@/components/error-state'
+import { LoadingState } from '@/components/loading-state'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 import { useHomeCatalogAccess } from '../hooks/use-home-catalog-access'
+import {
+  CurrentPriceOverview,
+  OmnivoCurrentPrices,
+} from './omnivo-current-prices'
 
-export function OmnivoPricingStory() {
+export function OmnivoPricingStory(props: { isAuthenticated: boolean }) {
   const { t } = useTranslation()
   const access = useHomeCatalogAccess()
+  let comparison = <CurrentPriceOverview />
+  if (access.loading) {
+    comparison = (
+      <LoadingState message={t('Loading current price comparison...')} />
+    )
+  } else if (access.error || !access.ready) {
+    comparison = (
+      <ErrorState
+        className='min-h-60 px-0'
+        title={t('Unable to load current prices')}
+        onRetry={() => void access.refetch()}
+      />
+    )
+  } else if (access.enabled && (!access.requireAuth || props.isAuthenticated)) {
+    comparison = <OmnivoCurrentPrices />
+  }
 
   return (
     <section
@@ -53,7 +74,7 @@ export function OmnivoPricingStory() {
           </h2>
           <p className='text-muted-foreground mt-5 max-w-sm text-sm leading-7'>
             {t(
-              'Compare model prices with official reference rates, so you can choose where your budget goes.'
+              'Model prices and discounts can change. Check the current rate before you start.'
             )}
           </p>
           {access.ready && access.enabled && (
@@ -68,54 +89,13 @@ export function OmnivoPricingStory() {
             </Button>
           )}
         </div>
-        <figure
-          aria-labelledby='omnivo-savings-example-title'
-          aria-describedby='omnivo-savings-example-note'
+        <div
+          role='region'
+          aria-label={t('Current model pricing')}
           className='bg-card/60 border-border min-w-0 rounded-xl border p-5 md:p-6'
         >
-          <Badge id='omnivo-savings-example-title' variant='secondary'>
-            {t('20% savings example')}
-          </Badge>
-          <div className='mt-7 flex flex-col gap-6'>
-            <div>
-              <div className='flex items-baseline justify-between gap-4'>
-                <p className='text-muted-foreground text-sm'>
-                  {t('Provider standard price')}
-                </p>
-                <span className='font-mono text-sm tabular-nums'>100%</span>
-              </div>
-              <div
-                aria-hidden='true'
-                className='bg-foreground/25 mt-3 h-3 w-full rounded-sm'
-              />
-            </div>
-            <div>
-              <div className='flex items-baseline justify-between gap-4'>
-                <p className='text-sm font-medium'>
-                  {t('Omnivo in this example')}
-                </p>
-                <span className='text-primary font-mono text-3xl font-semibold tracking-tight tabular-nums'>
-                  80%
-                </span>
-              </div>
-              <div aria-hidden='true' className='mt-3 flex h-3'>
-                <div className='bg-primary w-4/5 rounded-l-sm' />
-                <div className='border-primary/50 w-1/5 rounded-r-sm border border-l-0 border-dashed' />
-              </div>
-            </div>
-          </div>
-          <p className='text-primary mt-4 text-right text-xs font-medium'>
-            {t('20% left for your next idea')}
-          </p>
-          <figcaption
-            id='omnivo-savings-example-note'
-            className='text-muted-foreground mt-6 text-xs leading-6'
-          >
-            {t(
-              'Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.'
-            )}
-          </figcaption>
-        </figure>
+          {comparison}
+        </div>
       </div>
     </section>
   )
@@ -133,7 +113,7 @@ export function OmnivoFaq() {
     {
       question: t('How should I read a discount?'),
       answer: t(
-        'A 20% saving means paying 80% of the provider’s standard API price for the same usage. Input and output discounts can differ; use the comparison on each model page.'
+        'Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.'
       ),
     },
     {

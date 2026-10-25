@@ -7541,6 +7541,17 @@
     "One connection. Better value.": "One connection. Better value.",
     "Provider standard price": "Provider standard price",
     "Your next idea starts with one API.": "Your next idea starts with one API.",
-    "Your tools. Your workflow. One connection.": "Your tools. Your workflow. One connection."
+    "Your tools. Your workflow. One connection.": "Your tools. Your workflow. One connection.",
+    "Current model pricing": "Current model pricing",
+    "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.": "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.",
+    "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.": "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.",
+    "Explore current model prices": "Explore current model prices",
+    "Loading current price comparison...": "Loading current price comparison...",
+    "Model prices and discounts can change. Check the current rate before you start.": "Model prices and discounts can change. Check the current rate before you start.",
+    "Refresh to see the latest available prices.": "Refresh to see the latest available prices.",
+    "Unable to load current prices": "Unable to load current prices",
+    "For this model in group:": "For this model in group:",
+    "Half the official price, or less.": "Half the official price, or less.",
+    "Half-price model offer": "Half-price model offer"
   }
 }

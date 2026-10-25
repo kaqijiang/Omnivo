@@ -32,6 +32,7 @@ import {
   ModelOfficialPriceComparison,
   type ModelOfficialPriceComparisonProps,
 } from '../components/model-official-price-comparison'
+import { useOfficialPrices } from '../hooks/use-official-prices'
 import {
   compareOfficialTokenPrices,
   findOfficialPriceReference,
@@ -80,6 +81,7 @@ beforeEach(async () => {
 
 afterEach(async () => {
   client.clear()
+  vi.useRealTimers()
   useSystemConfigStore
     .getState()
     .setConfig({ currency: { ...DEFAULT_CURRENCY_CONFIG } })
@@ -99,6 +101,16 @@ function renderComparison(
       />
     </QueryClientProvider>
   )
+}
+
+function OfficialReferenceAvailability() {
+  const { data, error, comparisonTime } = useOfficialPrices()
+  const currentReference = findOfficialPriceReference(
+    model,
+    error ? null : data,
+    comparisonTime
+  )
+  return currentReference ? <p>Current official reference</p> : null
 }
 
 describe('official price reference validation', () => {
@@ -262,6 +274,66 @@ describe('official price comparisons', () => {
 })
 
 describe('official price comparison display', () => {
+  it('hides a displayed reference at its expiry without waiting for another request', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(NOW)
+    const request = vi.spyOn(api, 'get').mockResolvedValue({ data: catalog })
+    client.setQueryData(
+      ['official-model-prices'],
+      {
+        version: 1,
+        references: [
+          { ...reference, expiresAt: new Date(NOW + 1000).toISOString() },
+        ],
+      },
+      { updatedAt: NOW }
+    )
+    render(
+      <QueryClientProvider client={client}>
+        <OfficialReferenceAvailability />
+      </QueryClientProvider>
+    )
+    expect(screen.getByText('Current official reference')).toBeVisible()
+
+    await act(() => vi.advanceTimersByTimeAsync(1001))
+
+    expect(
+      screen.queryByText('Current official reference')
+    ).not.toBeInTheDocument()
+    expect(request).not.toHaveBeenCalled()
+  })
+
+  it('rechecks reference expiry on an unchanged successful refresh after the browser clock advances', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(NOW)
+    const expiringCatalog = {
+      version: 1,
+      references: [
+        { ...reference, expiresAt: new Date(NOW + 1000).toISOString() },
+      ],
+    }
+    vi.spyOn(api, 'get').mockResolvedValue({ data: expiringCatalog })
+    client.setQueryData(['official-model-prices'], expiringCatalog, {
+      updatedAt: NOW,
+    })
+    render(
+      <QueryClientProvider client={client}>
+        <OfficialReferenceAvailability />
+      </QueryClientProvider>
+    )
+    expect(screen.getByText('Current official reference')).toBeVisible()
+
+    vi.setSystemTime(NOW + 2000)
+    await act(() =>
+      client.refetchQueries({ queryKey: ['official-model-prices'] })
+    )
+    await act(() => vi.advanceTimersByTimeAsync(0))
+
+    expect(
+      screen.queryByText('Current official reference')
+    ).not.toBeInTheDocument()
+  })
+
   it('revalidates the public catalog on each request and shows updated reference prices', async () => {
     const previousAdapter = api.defaults.adapter
     let responseData: unknown = catalog
@@ -310,6 +382,37 @@ describe('official price comparison display', () => {
       screen.getByRole('link', { name: 'View official pricing source' })
     ).toHaveAttribute('href', reference.sourceUrl)
     expect(screen.getByText('Reference checked on Oct 23, 2026')).toBeVisible()
+  })
+
+  it('keeps every group and independent input/output differences in the compact comparison', async () => {
+    vi.spyOn(api, 'get').mockResolvedValue({ data: catalog })
+    renderComparison({ compact: true })
+    const comparison = await screen.findByRole('region', {
+      name: 'Compare with official pricing',
+    })
+    const defaultGroup = within(comparison).getByRole('region', {
+      name: 'default',
+    })
+    const premiumGroup = within(comparison).getByRole('region', {
+      name: 'premium',
+    })
+    expect(within(defaultGroup).getByText('Input')).toBeVisible()
+    expect(within(defaultGroup).getByText('Output')).toBeVisible()
+    expect(within(defaultGroup).getByText('$1.6')).toBeVisible()
+    expect(within(defaultGroup).getByText('Save 20%')).toBeVisible()
+    expect(within(defaultGroup).getByText('Same price')).toBeVisible()
+    expect(within(premiumGroup).getByText('$2.4')).toBeVisible()
+    expect(within(premiumGroup).getByText('$12')).toBeVisible()
+    expect(within(premiumGroup).getByText('20% higher')).toBeVisible()
+    expect(within(premiumGroup).getByText('50% higher')).toBeVisible()
+    expect(
+      within(comparison).getByText(/per 1M tokens · Standard catalog prices/)
+    ).toBeVisible()
+    expect(
+      within(comparison).getByRole('link', {
+        name: 'View official pricing source',
+      })
+    ).toHaveAttribute('href', reference.sourceUrl)
   })
 
   it('honours the selected group, token unit and recharge-adjusted currency on both columns', async () => {
@@ -382,5 +485,22 @@ describe('official price comparison display', () => {
     )
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('hides a previously displayed discount when refreshing the reference fails', async () => {
+    vi.spyOn(api, 'get')
+      .mockResolvedValueOnce({ data: catalog })
+      .mockRejectedValue(new Error('Reference unavailable'))
+    renderComparison({ selectedGroup: 'default' })
+    expect(await screen.findByText('Save 20%')).toBeVisible()
+
+    await act(() =>
+      client.invalidateQueries({ queryKey: ['official-model-prices'] })
+    )
+
+    await waitFor(() =>
+      expect(screen.queryByText('Save 20%')).not.toBeInTheDocument()
+    )
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
   })
 })

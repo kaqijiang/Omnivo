@@ -17,13 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
 
 import { api } from '@/lib/api'
 
 import { parseOfficialPriceCatalog } from '../lib/official-pricing'
 
 export function useOfficialPrices() {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['official-model-prices'],
     queryFn: async ({ signal }) => {
       const response = await api.get<unknown>('/official-model-prices.json', {
@@ -38,4 +39,38 @@ export function useOfficialPrices() {
     retry: false,
     meta: { errorToast: false },
   })
+  const [comparisonTime, setComparisonTime] = useState(() => Date.now())
+
+  useEffect(() => {
+    let timer: number | undefined
+    const refreshComparisonTime = () => {
+      if (timer !== undefined) window.clearTimeout(timer)
+      const now = Date.now()
+      setComparisonTime(now)
+      let nextExpiry = Number.POSITIVE_INFINITY
+      for (const reference of query.data?.references ?? []) {
+        const expiresAt = Date.parse(reference.expiresAt)
+        if (expiresAt > now) nextExpiry = Math.min(nextExpiry, expiresAt)
+      }
+      if (Number.isFinite(nextExpiry)) {
+        // Long-lived references can exceed the browser's signed 32-bit delay.
+        timer = window.setTimeout(
+          refreshComparisonTime,
+          Math.min(nextExpiry - now, 2_147_483_647)
+        )
+      }
+    }
+
+    refreshComparisonTime()
+    window.addEventListener('focus', refreshComparisonTime)
+    document.addEventListener('visibilitychange', refreshComparisonTime)
+    return () => {
+      if (timer !== undefined) window.clearTimeout(timer)
+      window.removeEventListener('focus', refreshComparisonTime)
+      document.removeEventListener('visibilitychange', refreshComparisonTime)
+    }
+    // A successful refresh must advance the clock even when JSON is unchanged.
+  }, [query.data, query.dataUpdatedAt])
+
+  return { ...query, comparisonTime }
 }

@@ -7541,6 +7541,17 @@
     "One connection. Better value.": "Une connexion. Plus pour votre budget.",
     "Provider standard price": "Tarif standard du fournisseur",
     "Your next idea starts with one API.": "Votre prochaine idée commence par une API.",
-    "Your tools. Your workflow. One connection.": "Vos outils. Votre façon de travailler. Une seule connexion."
+    "Your tools. Your workflow. One connection.": "Vos outils. Votre façon de travailler. Une seule connexion.",
+    "Current model pricing": "Tarifs actuels des modèles",
+    "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.": "Les remises sont calculées en comparant le tarif actuel d’Omnivo au tarif API standard publié par le fournisseur, pour le même modèle et un volume d’utilisation identique. Les économies sur les entrées et les sorties peuvent différer et évoluer dans le temps.",
+    "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.": "Les remises varient selon le modèle et le poste de facturation. Consultez le catalogue pour connaître les tarifs actuels et les comparaisons disponibles avec les tarifs officiels.",
+    "Explore current model prices": "Consulter les tarifs actuels des modèles",
+    "Loading current price comparison...": "Chargement du comparatif des tarifs actuels…",
+    "Model prices and discounts can change. Check the current rate before you start.": "Les tarifs et les remises des modèles peuvent évoluer. Vérifiez le tarif actuel avant de commencer.",
+    "Refresh to see the latest available prices.": "Actualisez pour voir les derniers tarifs disponibles.",
+    "Unable to load current prices": "Impossible de charger les tarifs actuels",
+    "For this model in group:": "Pour ce modèle dans le groupe :",
+    "Half the official price, or less.": "La moitié du tarif officiel, ou moins.",
+    "Half-price model offer": "Offre : un modèle à moitié prix"
   }
 }

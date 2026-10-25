@@ -7541,6 +7541,17 @@
     "One connection. Better value.": "Một kết nối. Nhiều giá trị hơn.",
     "Provider standard price": "Giá tiêu chuẩn của nhà cung cấp",
     "Your next idea starts with one API.": "Ý tưởng tiếp theo bắt đầu từ một API.",
-    "Your tools. Your workflow. One connection.": "Công cụ của bạn. Quy trình của bạn. Một kết nối."
+    "Your tools. Your workflow. One connection.": "Công cụ của bạn. Quy trình của bạn. Một kết nối.",
+    "Current model pricing": "Giá mô hình hiện tại",
+    "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.": "Mức giảm giá được tính bằng cách so sánh giá Omnivo hiện tại với giá API tiêu chuẩn của nhà cung cấp cho cùng mô hình và mức sử dụng. Mức tiết kiệm cho đầu vào và đầu ra có thể khác nhau và thay đổi theo thời gian.",
+    "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.": "Mức giảm giá khác nhau tùy mô hình và hạng mục tính phí. Xem danh mục để biết giá hiện tại và các so sánh với giá chính thức nếu có.",
+    "Explore current model prices": "Xem giá mô hình hiện tại",
+    "Loading current price comparison...": "Đang tải so sánh giá hiện tại…",
+    "Model prices and discounts can change. Check the current rate before you start.": "Giá mô hình và mức giảm giá có thể thay đổi. Hãy kiểm tra giá hiện tại trước khi sử dụng.",
+    "Refresh to see the latest available prices.": "Làm mới để xem giá mới nhất hiện có.",
+    "Unable to load current prices": "Không thể tải giá hiện tại",
+    "For this model in group:": "Áp dụng cho mô hình này trong nhóm:",
+    "Half the official price, or less.": "Bằng nửa giá chính thức hoặc thấp hơn.",
+    "Half-price model offer": "Ưu đãi mô hình nửa giá"
   }
 }

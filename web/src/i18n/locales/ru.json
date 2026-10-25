@@ -7541,6 +7541,17 @@
     "One connection. Better value.": "Одно подключение. Больше выгоды.",
     "Provider standard price": "Стандартная цена поставщика",
     "Your next idea starts with one API.": "Ваша следующая идея начинается с одного API.",
-    "Your tools. Your workflow. One connection.": "Ваши инструменты. Ваш рабочий процесс. Одно подключение."
+    "Your tools. Your workflow. One connection.": "Ваши инструменты. Ваш рабочий процесс. Одно подключение.",
+    "Current model pricing": "Текущие цены на модели",
+    "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.": "Скидки рассчитываются сравнением текущей цены Omnivo со стандартной ценой API на сайте поставщика для той же модели и одинакового объёма использования. Экономия на входных и выходных данных может различаться и меняться со временем.",
+    "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.": "Скидки зависят от модели и оплачиваемой позиции. В каталоге представлены текущие цены и доступные сравнения с официальными ценами.",
+    "Explore current model prices": "Посмотреть текущие цены на модели",
+    "Loading current price comparison...": "Загрузка сравнения текущих цен…",
+    "Model prices and discounts can change. Check the current rate before you start.": "Цены и скидки на модели могут меняться. Проверьте текущий тариф перед началом работы.",
+    "Refresh to see the latest available prices.": "Обновите данные, чтобы увидеть последние доступные цены.",
+    "Unable to load current prices": "Не удалось загрузить текущие цены",
+    "For this model in group:": "Для этой модели в группе:",
+    "Half the official price, or less.": "Не более половины официальной цены.",
+    "Half-price model offer": "Модель за полцены"
   }
 }

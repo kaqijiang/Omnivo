@@ -64,6 +64,10 @@ beforeEach(() => {
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
   })
   queryClient.setQueryData(['status'], {})
+  queryClient.setQueryData(['official-model-prices'], {
+    version: 1,
+    references: [],
+  })
   vi.spyOn(pricingApi, 'getPricing').mockResolvedValue(catalog)
   vi.spyOn(api, 'getStatus').mockResolvedValue({})
   useSystemConfigStore.getState().setConfig({
@@ -375,7 +379,11 @@ test('a catalog load failure can be retried without presenting it as an empty ca
     await screen.findByText('Unable to load the model catalog')
   ).toBeVisible()
   expect(screen.queryByText('No models available yet')).not.toBeInTheDocument()
-  await user.click(screen.getByRole('button', { name: 'Retry' }))
+  await user.click(
+    within(
+      screen.getByRole('region', { name: 'Find your next model.' })
+    ).getByRole('button', { name: 'Retry' })
+  )
 
   expect(
     await screen.findByRole('heading', { name: model.model_name })
@@ -396,7 +404,7 @@ test('the discount FAQ opens with the keyboard and explains savings without clai
   expect(question).toHaveAttribute('aria-expanded', 'true')
   expect(
     screen.getByText(
-      'A 20% saving means paying 80% of the provider’s standard API price for the same usage. Input and output discounts can differ; use the comparison on each model page.'
+      'Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.'
     )
   ).toBeVisible()
 })
@@ -418,21 +426,151 @@ test('model names are direct guide links while catalog prices keep their group c
   ).toBeVisible()
 })
 
-test('the prominent savings graphic identifies an example and links to actual model prices', async () => {
+test('missing official references show the catalog entry without a fixed discount claim', async () => {
   renderLanding()
-  const example = await screen.findByRole('figure', {
-    name: '20% savings example',
+  const current = await screen.findByRole('region', {
+    name: 'Current model pricing',
   })
 
-  expect(within(example).getByText('100%')).toBeVisible()
-  expect(within(example).getByText('80%')).toBeVisible()
-  expect(example).toHaveAccessibleDescription(
-    'Example only. Compare each model’s input and output rates with the official reference to confirm its actual discount.'
-  )
+  expect(
+    await within(current).findByText('Explore current model prices')
+  ).toBeVisible()
+  expect(
+    screen.queryByRole('figure', { name: '20% savings example' })
+  ).not.toBeInTheDocument()
+  expect(within(current).queryByText(/Save .*%/)).not.toBeInTheDocument()
   expect(
     screen.getByRole('link', { name: 'Compare model prices' })
   ).toHaveAttribute('href', '/pricing?tokenUnit=M')
   expect(
     screen.getByRole('link', { name: 'One connection. Better value.' })
   ).toHaveAttribute('href', '/#omnivo-pricing-story-title')
+})
+
+function setComparableCatalog() {
+  const pricedModel = { ...model, vendor_id: 1 }
+  const pricing = {
+    ...catalog,
+    data: [pricedModel],
+    vendors: [{ id: 1, name: 'OpenAI' }],
+  }
+  vi.mocked(pricingApi.getPricing).mockResolvedValue(pricing)
+  queryClient.setQueryData(['official-model-prices'], {
+    version: 1,
+    references: [
+      {
+        modelId: model.model_name,
+        provider: 'openai',
+        currency: 'USD',
+        unit: 'million_tokens',
+        scope: 'standard_text_flat',
+        inputUsdPerMillion: 2.5,
+        outputUsdPerMillion: 7.5,
+        sourceUrl: 'https://openai.com/api/pricing/',
+        checkedAt: new Date(Date.now() - 60_000).toISOString(),
+        expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+      },
+    ],
+  })
+  return pricing
+}
+
+test('a new model price changes homepage savings from 20% to 50% without changing copy', async () => {
+  const pricing = setComparableCatalog()
+  renderLanding()
+  const current = await screen.findByRole('region', {
+    name: 'Current model pricing',
+  })
+  expect(await within(current).findAllByText('Save 20%')).toHaveLength(2)
+  expect(
+    within(current).queryByRole('region', { name: 'Half-price model offer' })
+  ).not.toBeInTheDocument()
+
+  await act(async () => {
+    queryClient.setQueryData(['pricing'], {
+      ...pricing,
+      data: [{ ...pricing.data[0], model_ratio: 0.625 }],
+    })
+  })
+
+  expect(await within(current).findAllByText('Save 50%')).toHaveLength(2)
+  expect(within(current).queryByText('Save 20%')).not.toBeInTheDocument()
+  expect(
+    within(current).getByRole('link', { name: 'View official pricing source' })
+  ).toHaveAttribute('href', 'https://openai.com/api/pricing/')
+  expect(
+    within(current).getByRole('region', { name: 'Half-price model offer' })
+  ).toHaveTextContent('default')
+  await act(async () => queryClient.setQueryData(['pricing'], pricing))
+  expect(await within(current).findAllByText('Save 20%')).toHaveLength(2)
+  expect(
+    within(current).queryByRole('region', { name: 'Half-price model offer' })
+  ).not.toBeInTheDocument()
+})
+
+test('homepage comparison keeps input, output, and account groups distinct', async () => {
+  const pricing = setComparableCatalog()
+  vi.mocked(pricingApi.getPricing).mockResolvedValue({
+    ...pricing,
+    data: [
+      {
+        ...pricing.data[0],
+        completion_ratio: 3.75,
+        enable_groups: ['default', 'premium'],
+      },
+    ],
+    group_ratio: { default: 1, premium: 2 },
+  })
+  renderLanding()
+  const current = await screen.findByRole('region', {
+    name: 'Current model pricing',
+  })
+
+  expect(await within(current).findByText('Save 20%')).toBeVisible()
+  expect(within(current).getByText('Same price')).toBeVisible()
+  expect(within(current).getByText('60% higher')).toBeVisible()
+  expect(within(current).getByText('100% higher')).toBeVisible()
+  expect(within(current).getByText('premium')).toBeVisible()
+})
+
+test('a failed price refresh removes cached discounts until current prices can be retrieved', async () => {
+  setComparableCatalog()
+  renderLanding()
+  const current = await screen.findByRole('region', {
+    name: 'Current model pricing',
+  })
+  expect(await within(current).findAllByText('Save 20%')).toHaveLength(2)
+  vi.mocked(pricingApi.getPricing).mockRejectedValue(
+    new Error('Pricing refresh failed')
+  )
+
+  await act(async () => {
+    await queryClient.refetchQueries({ queryKey: ['pricing'] })
+  })
+
+  expect(
+    await within(current).findByText('Unable to load current prices')
+  ).toBeVisible()
+  expect(within(current).queryByText('Save 20%')).not.toBeInTheDocument()
+})
+
+test('private cached comparisons are not mounted for an anonymous visitor', async () => {
+  const pricing = setComparableCatalog()
+  queryClient.setQueryData(['pricing'], pricing)
+  queryClient.setQueryData(['status'], {
+    HeaderNavModules: { pricing: { enabled: true, requireAuth: true } },
+  })
+  renderLanding()
+  const current = await screen.findByRole('region', {
+    name: 'Current model pricing',
+  })
+
+  expect(
+    await within(current).findByText('Explore current model prices')
+  ).toBeVisible()
+  expect(within(current).queryByText('Save 20%')).not.toBeInTheDocument()
+  expect(
+    within(current).queryByRole('link', { name: model.model_name })
+  ).not.toBeInTheDocument()
+  expect(pricingApi.getPricing).not.toHaveBeenCalled()
 })

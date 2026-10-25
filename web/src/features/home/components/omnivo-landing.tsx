@@ -108,7 +108,7 @@ export function OmnivoLanding(props: OmnivoLandingProps) {
       </section>
 
       <OmnivoModelDiscovery isAuthenticated={props.isAuthenticated} />
-      <OmnivoPricingStory />
+      <OmnivoPricingStory isAuthenticated={props.isAuthenticated} />
       <OmnivoQuickstart />
       <OmnivoFaq />
 

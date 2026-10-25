@@ -7541,6 +7541,17 @@
     "One connection. Better value.": "ひとつの接続で、もっとお得に。",
     "Provider standard price": "提供元の標準料金",
     "Your next idea starts with one API.": "次のアイデアは、ひとつの API から。",
-    "Your tools. Your workflow. One connection.": "いつものツール、いつものワークフロー。接続はひとつ。"
+    "Your tools. Your workflow. One connection.": "いつものツール、いつものワークフロー。接続はひとつ。",
+    "Current model pricing": "現在のモデル料金",
+    "Discounts compare the current Omnivo price with the provider’s standard API price for the same model and usage. Input and output savings can differ and change over time.": "割引率は、同じモデル・同じ使用量について、Omnivo の現在の料金と提供元が公表する標準 API 料金を比較して算出します。入力と出力で割引率が異なる場合があり、料金の変動に応じて変わります。",
+    "Discounts vary by model and billing item. Explore the catalog for current prices and available official-price comparisons.": "割引率はモデルや課金項目によって異なります。カタログで現在の料金と、比較可能な公式料金をご確認ください。",
+    "Explore current model prices": "現在のモデル料金を確認",
+    "Loading current price comparison...": "現在の料金比較を読み込み中…",
+    "Model prices and discounts can change. Check the current rate before you start.": "モデルの料金や割引率は変動する場合があります。ご利用前に現在の料金をご確認ください。",
+    "Refresh to see the latest available prices.": "更新して最新の料金をご確認ください。",
+    "Unable to load current prices": "現在の料金を読み込めません",
+    "For this model in group:": "このモデルの対象グループ：",
+    "Half the official price, or less.": "公式料金の半額以下。",
+    "Half-price model offer": "モデルの半額オファー"
   }
 }
