@@ -25,6 +25,79 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestFirstTopUpReferralRewardOptionAndInfo(t *testing.T) {
+	previousPayment := *operation_setting.GetPaymentSetting()
+	previousUnit := common.QuotaPerUnit
+	t.Cleanup(func() {
+		*operation_setting.GetPaymentSetting() = previousPayment
+		common.QuotaPerUnit = previousUnit
+	})
+	common.QuotaPerUnit = 500000
+	for _, dialect := range []struct{ kind, env string }{{"sqlite", ""}, {"mysql", "TEST_MYSQL_DSN"}, {"postgres", "TEST_POSTGRES_DSN"}} {
+		t.Run(dialect.kind, func(t *testing.T) {
+			if dialect.env != "" && os.Getenv(dialect.env) == "" {
+				t.Skip("set " + dialect.env + " to run this database")
+			}
+			db := modelManagementDB(t, dialect.kind, os.Getenv(dialect.env))
+			payment := operation_setting.GetPaymentSetting()
+			payment.ComplianceConfirmed = true
+			payment.ComplianceTermsVersion = operation_setting.CurrentComplianceTermsVersion
+			const option = operation_setting.FirstTopUpReferralRewardOption
+			var response struct{ Success bool }
+			modelManagementRequest(t, UpdateOption, http.MethodPut, "/api/option/", OptionUpdateRequest{Key: option, Value: "5"}, &response)
+			require.True(t, response.Success)
+			var saved model.Option
+			require.NoError(t, db.Where(&model.Option{Key: option}).First(&saved).Error)
+			assert.Equal(t, "5", saved.Value)
+			payment.FirstTopUpReferralRewardUSD = 0
+			require.NoError(t, config.GlobalConfig.LoadFromDB(map[string]string{option: saved.Value}))
+			assert.Equal(t, 5.0, payment.FirstTopUpReferralRewardUSD)
+
+			for _, value := range []string{"-1", "NaN", "Inf", "1e100", "0.0000000001", "", "not-a-number"} {
+				modelManagementRequest(t, UpdateOption, http.MethodPut, "/api/option/", OptionUpdateRequest{Key: option, Value: value}, &response)
+				assert.False(t, response.Success, "invalid reward %q", value)
+				require.NoError(t, db.Where(&model.Option{Key: option}).First(&saved).Error)
+				assert.Equal(t, "5", saved.Value)
+				assert.Equal(t, 5.0, payment.FirstTopUpReferralRewardUSD)
+			}
+
+			for _, tc := range []struct {
+				name       string
+				confirmed  bool
+				configured float64
+				want       float64
+			}{
+				{"active", true, 5, 5},
+				{"disabled", true, 0, 0},
+				{"compliance not confirmed", false, 5, 0},
+				{"invalid runtime value", true, math.NaN(), 0},
+			} {
+				payment.ComplianceConfirmed = tc.confirmed
+				payment.FirstTopUpReferralRewardUSD = tc.configured
+				var info struct {
+					Success bool
+					Data    struct {
+						Reward float64 `json:"first_topup_referral_reward_usd"`
+					}
+				}
+				modelManagementRequest(t, GetTopUpInfo, http.MethodGet, "/api/user/topup/info", nil, &info)
+				require.True(t, info.Success, tc.name)
+				assert.Equal(t, tc.want, info.Data.Reward, tc.name)
+			}
+
+			payment.ComplianceConfirmed = false
+			payment.FirstTopUpReferralRewardUSD = 5
+			modelManagementRequest(t, UpdateOption, http.MethodPut, "/api/option/", OptionUpdateRequest{Key: option, Value: "10"}, &response)
+			assert.False(t, response.Success, "activation requires existing compliance confirmation")
+			require.NoError(t, db.Where(&model.Option{Key: option}).First(&saved).Error)
+			assert.Equal(t, "5", saved.Value)
+			modelManagementRequest(t, UpdateOption, http.MethodPut, "/api/option/", OptionUpdateRequest{Key: option, Value: "0"}, &response)
+			require.True(t, response.Success, "disabling a reward remains possible")
+			assert.Zero(t, payment.FirstTopUpReferralRewardUSD)
+		})
+	}
+}
+
 func TestUpdateOptionRejectsInvalidTaskBillingExpressions(t *testing.T) {
 	const pluginKey = "billing-save-probe"
 	const modelName = "billing-save-model"

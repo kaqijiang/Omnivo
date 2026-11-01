@@ -45,6 +45,9 @@ function Fixture() {
             QuotaForInviter: 0,
             QuotaForInvitee: 0,
             TopUpLink: '',
+            payment_setting: {
+              first_topup_referral_reward_usd: 5,
+            },
             quota_setting: {
               enable_free_model_pre_consume: true,
               trust_quota_usd: 10,

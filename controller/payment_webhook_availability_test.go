@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/Calcium-Ion/go-epay/epay"
+	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
@@ -15,7 +17,100 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/webhook"
 )
+
+func TestPaidCheckoutReferralRewardUsesConfirmedPayment(t *testing.T) {
+	previousPayment := *operation_setting.GetPaymentSetting()
+	previousUnit := common.QuotaPerUnit
+	previousStripeAPI, previousStripeSecret, previousStripePrice := setting.StripeApiSecret, setting.StripeWebhookSecret, setting.StripePriceId
+	t.Cleanup(func() {
+		*operation_setting.GetPaymentSetting() = previousPayment
+		common.QuotaPerUnit = previousUnit
+		setting.StripeApiSecret, setting.StripeWebhookSecret, setting.StripePriceId = previousStripeAPI, previousStripeSecret, previousStripePrice
+	})
+	common.QuotaPerUnit = 500000
+	setting.StripeApiSecret, setting.StripeWebhookSecret, setting.StripePriceId = "fixture_api", "fixture_signature_secret", "fixture_price"
+	for _, provider := range []string{model.PaymentProviderStripe, model.PaymentProviderCreem} {
+		t.Run(provider, func(t *testing.T) {
+			db := modelManagementDB(t, "sqlite", "")
+			require.NoError(t, db.AutoMigrate(&model.TopUp{}, &model.SubscriptionOrder{}, &model.FirstTopUpReferralReward{}, &model.Log{}))
+			payment := operation_setting.GetPaymentSetting()
+			payment.ComplianceConfirmed = true
+			payment.ComplianceTermsVersion = operation_setting.CurrentComplianceTermsVersion
+			payment.FirstTopUpReferralRewardUSD = 5
+			inviter := model.User{Id: 1, Username: "referral_checkout_inviter", AffCode: "checkout-inviter", Status: common.UserStatusEnabled}
+			invitee := model.User{Id: 2, Username: "referral_checkout_friend", AffCode: "checkout-friend", InviterId: 1, Status: common.UserStatusEnabled}
+			require.NoError(t, db.Create(&inviter).Error)
+			require.NoError(t, db.Create(&invitee).Error)
+			for _, paidCents := range []int{0, 1000000} {
+				order := model.TopUp{UserId: invitee.Id, Amount: 10000, Money: 10000, TradeNo: fmt.Sprintf("referral-checkout-%s-%d", provider, paidCents), PaymentMethod: provider, PaymentProvider: provider, Status: common.TopUpStatusPending}
+				if provider == model.PaymentProviderCreem {
+					order.Amount = 5000000000
+				}
+				require.NoError(t, order.Insert())
+				for attempt := range 3 {
+					if provider == model.PaymentProviderStripe {
+						expectFailure := paidCents > 0 && attempt == 0
+						if expectFailure {
+							require.NoError(t, db.Model(&model.User{}).Where("id = ?", inviter.Id).Update("aff_quota", common.MaxWalletQuota).Error)
+						}
+						event := stripe.Event{ID: "evt_referral_fixture", APIVersion: stripe.APIVersion, Type: stripe.EventTypeCheckoutSessionCompleted, Data: &stripe.EventData{Object: map[string]any{
+							"client_reference_id": order.TradeNo, "customer": "fixture_customer", "status": "complete", "payment_status": "paid", "amount_total": float64(paidCents), "currency": "usd",
+						}}}
+						body, err := common.Marshal(map[string]any{"id": event.ID, "api_version": event.APIVersion, "type": event.Type, "data": map[string]any{"object": event.Data.Object}})
+						require.NoError(t, err)
+						signed := webhook.GenerateTestSignedPayload(&webhook.UnsignedPayload{Payload: body, Secret: setting.StripeWebhookSecret})
+						recorder := httptest.NewRecorder()
+						ctx, _ := gin.CreateTestContext(recorder)
+						ctx.Request = httptest.NewRequest(http.MethodPost, "/api/stripe/webhook", strings.NewReader(string(body)))
+						ctx.Request.Header.Set("Stripe-Signature", signed.Header)
+						StripeWebhook(ctx)
+						if expectFailure {
+							assert.Equal(t, http.StatusInternalServerError, recorder.Code, "an uncommitted payment must request a webhook retry")
+							pending := model.GetTopUpByTradeNo(order.TradeNo)
+							require.NotNil(t, pending)
+							assert.Equal(t, common.TopUpStatusPending, pending.Status)
+							require.NoError(t, db.Model(&model.User{}).Where("id = ?", inviter.Id).Update("aff_quota", 0).Error)
+						} else {
+							assert.Equal(t, http.StatusOK, recorder.Code)
+						}
+					} else {
+						event := &CreemWebhookEvent{}
+						event.Object.RequestId = order.TradeNo
+						event.Object.Order.Status = "paid"
+						event.Object.Order.Type = "onetime"
+						event.Object.Order.AmountPaid = paidCents
+						event.Object.Order.Currency = "USD"
+						recorder := httptest.NewRecorder()
+						ctx, _ := gin.CreateTestContext(recorder)
+						ctx.Request = httptest.NewRequest(http.MethodPost, "/api/user/creem/webhook", nil)
+						handleCheckoutCompleted(ctx, event)
+						assert.Equal(t, http.StatusOK, recorder.Code)
+					}
+				}
+				saved := model.GetTopUpByTradeNo(order.TradeNo)
+				require.NotNil(t, saved)
+				assert.Equal(t, common.TopUpStatusSuccess, saved.Status)
+				require.NotNil(t, saved.PaymentReceived)
+				assert.Equal(t, paidCents > 0, *saved.PaymentReceived)
+				require.NoError(t, db.First(&inviter, inviter.Id).Error)
+				var rewards int64
+				require.NoError(t, db.Model(&model.FirstTopUpReferralReward{}).Count(&rewards).Error)
+				if paidCents == 0 {
+					assert.Zero(t, inviter.AffQuota)
+					assert.Zero(t, rewards)
+				} else {
+					assert.Equal(t, 2500000, inviter.AffQuota)
+					assert.EqualValues(t, 1, rewards)
+				}
+			}
+			require.NoError(t, db.First(&invitee, invitee.Id).Error)
+			assert.Equal(t, 10000000000, invitee.Quota, "existing checkout credit is preserved, without duplicate credit or an invitee bonus")
+		})
+	}
+}
 
 func confirmPaymentComplianceForTest(t *testing.T) {
 	t.Helper()

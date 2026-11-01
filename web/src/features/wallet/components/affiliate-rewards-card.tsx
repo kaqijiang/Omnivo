@@ -25,6 +25,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { IconBadge } from '@/components/ui/icon-badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toIntlLocale } from '@/i18n/languages'
+import { formatBillingCurrencyFromUSD } from '@/lib/currency'
 import { formatQuota } from '@/lib/format'
 
 import type { UserWalletData } from '../types'
@@ -34,6 +36,7 @@ interface AffiliateRewardsCardProps {
   affiliateLink: string
   onTransfer: () => void
   complianceConfirmed?: boolean
+  firstTopupRewardUSD?: number
   loading?: boolean
 }
 
@@ -42,9 +45,11 @@ export function AffiliateRewardsCard({
   affiliateLink,
   onTransfer,
   complianceConfirmed = true,
+  firstTopupRewardUSD = 0,
   loading,
 }: AffiliateRewardsCardProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = toIntlLocale(i18n.resolvedLanguage || i18n.language)
   if (loading) {
     return (
       <Card data-card-hover='false' className='bg-muted/20 py-0'>
@@ -123,6 +128,20 @@ export function AffiliateRewardsCard({
             </Button>
           )}
         </div>
+        {complianceConfirmed &&
+        Number.isFinite(firstTopupRewardUSD) &&
+        firstTopupRewardUSD > 0 ? (
+          <p className='text-muted-foreground text-xs lg:col-span-3'>
+            {t(
+              "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.",
+              {
+                amount: formatBillingCurrencyFromUSD(firstTopupRewardUSD, {
+                  locale,
+                }),
+              }
+            )}
+          </p>
+        ) : null}
         {!complianceConfirmed ? (
           <p className='text-muted-foreground text-xs lg:col-span-3'>
             {t(

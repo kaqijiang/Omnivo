@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "Impossible de charger les tarifs actuels",
     "For this model in group:": "Pour ce modèle dans le groupe :",
     "Half the official price, or less.": "La moitié du tarif officiel, ou moins.",
-    "Half-price model offer": "Offre : un modèle à moitié prix"
+    "Half-price model offer": "Offre : un modèle à moitié prix",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "Recevez {{amount}} de crédit de parrainage à la première recharge payante réussie d’un ami invité. Une seule récompense par ami ; le minimum du moyen de paiement s’applique.",
+    "First top-up referral reward (USD)": "Prime de parrainage à la première recharge (USD)",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "Prime de parrainage de {{quota}} pour la première recharge de l’utilisateur invité {{user_id}}",
+    "Invalid first top-up referral reward": "Montant de la prime de parrainage à la première recharge non valide",
+    "Referral reward balance limit exceeded": "Plafond du solde de parrainage dépassé",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "Crédit accordé au parrain lors de la première recharge payante de son filleul. Saisissez 0 pour désactiver. Les montants minimaux de paiement habituels s’appliquent."
   }
 }

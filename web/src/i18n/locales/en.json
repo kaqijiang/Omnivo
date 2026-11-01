@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "Unable to load current prices",
     "For this model in group:": "For this model in group:",
     "Half the official price, or less.": "Half the official price, or less.",
-    "Half-price model offer": "Half-price model offer"
+    "Half-price model offer": "Half-price model offer",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.",
+    "First top-up referral reward (USD)": "First top-up referral reward (USD)",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "First top-up referral reward {{quota}} for inviting user {{user_id}}",
+    "Invalid first top-up referral reward": "Invalid first top-up referral reward",
+    "Referral reward balance limit exceeded": "Referral reward balance limit exceeded",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply."
   }
 }

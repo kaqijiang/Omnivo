@@ -64,6 +64,10 @@ const BILLING_SECTIONS = [
           QuotaForInviter: settings.QuotaForInviter,
           QuotaForInvitee: settings.QuotaForInvitee,
           TopUpLink: settings.TopUpLink,
+          payment_setting: {
+            first_topup_referral_reward_usd:
+              settings['payment_setting.first_topup_referral_reward_usd'],
+          },
           quota_setting: {
             trust_quota_usd: settings['quota_setting.trust_quota_usd'],
             pre_consume_multiplier:

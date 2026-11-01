@@ -25,6 +25,13 @@ import (
 
 func GetTopUpInfo(c *gin.Context) {
 	complianceConfirmed := operation_setting.IsPaymentComplianceConfirmed()
+	firstTopUpReferralRewardUSD := 0.0
+	if complianceConfirmed {
+		configuredReward := operation_setting.GetPaymentSetting().FirstTopUpReferralRewardUSD
+		if quota, err := operation_setting.FirstTopUpReferralRewardQuota(configuredReward); err == nil && quota > 0 {
+			firstTopUpReferralRewardUSD = configuredReward
+		}
+	}
 
 	// 获取支付方式
 	payMethods := operation_setting.PayMethods
@@ -98,6 +105,7 @@ func GetTopUpInfo(c *gin.Context) {
 	}
 
 	data := gin.H{
+		"first_topup_referral_reward_usd":  firstTopUpReferralRewardUSD,
 		"enable_online_topup":              isEpayTopUpEnabled(),
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),

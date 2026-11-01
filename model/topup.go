@@ -20,9 +20,12 @@ type TopUp struct {
 	TradeNo         string  `json:"trade_no" gorm:"unique;type:varchar(255);index"`
 	PaymentMethod   string  `json:"payment_method" gorm:"type:varchar(50)"`
 	PaymentProvider string  `json:"payment_provider" gorm:"type:varchar(50);default:''"`
-	CreateTime      int64   `json:"create_time"`
-	CompleteTime    int64   `json:"complete_time"`
-	Status          string  `json:"status"`
+	// Nil preserves legacy paid-order eligibility history; false identifies a
+	// checkout completed without payment (for example a fully discounted order).
+	PaymentReceived *bool  `json:"payment_received,omitempty"`
+	CreateTime      int64  `json:"create_time"`
+	CompleteTime    int64  `json:"complete_time"`
+	Status          string `json:"status"`
 }
 
 const (
@@ -185,6 +188,7 @@ func RechargeEpay(tradeNo string, actualPaymentMethod string, callerIp string) (
 	}
 
 	var quotaToAdd int
+	var referralReward *FirstTopUpReferralReward
 	topUp := &TopUp{}
 	err = DB.Transaction(func(tx *gorm.DB) error {
 		if err := lockForUpdate(tx).Where(refCol+" = ?", tradeNo).First(topUp).Error; err != nil {
@@ -199,6 +203,13 @@ func RechargeEpay(tradeNo string, actualPaymentMethod string, callerIp string) (
 		}
 		if topUp.Status != common.TopUpStatusPending {
 			return ErrTopUpStatusInvalid
+		}
+		paymentReceived := topUp.Money > 0
+		topUp.PaymentReceived = &paymentReceived
+		var rewardErr error
+		referralReward, rewardErr = awardFirstTopUpReferralRewardTx(tx, topUp)
+		if rewardErr != nil {
+			return rewardErr
 		}
 		if actualPaymentMethod != "" && topUp.PaymentMethod != actualPaymentMethod {
 			topUp.PaymentMethod = actualPaymentMethod
@@ -226,6 +237,7 @@ func RechargeEpay(tradeNo string, actualPaymentMethod string, callerIp string) (
 	if alreadyDone {
 		return true, nil
 	}
+	recordFirstTopUpReferralReward(referralReward)
 	syncCreditUserQuotaCache(topUp.UserId, quotaToAdd, common.LogText("epay topup"))
 
 	common.SysLog(common.LogText("Epay top-up succeeded trade_no=%s user_id=%d quota_to_add=%d money=%.2f", topUp.TradeNo, topUp.UserId, quotaToAdd, topUp.Money))
@@ -233,12 +245,14 @@ func RechargeEpay(tradeNo string, actualPaymentMethod string, callerIp string) (
 	return false, nil
 }
 
-func Recharge(referenceId string, customerId string, callerIp string) (err error) {
+func Recharge(referenceId string, customerId string, callerIp string, paymentReceived bool) (err error) {
 	if referenceId == "" {
 		return errors.New("payment order number not provided")
 	}
 
 	var quota int
+	var referralReward *FirstTopUpReferralReward
+	alreadyDone := false
 	topUp := &TopUp{}
 
 	refCol := "`trade_no`"
@@ -255,9 +269,18 @@ func Recharge(referenceId string, customerId string, callerIp string) (err error
 		if topUp.PaymentProvider != PaymentProviderStripe {
 			return ErrPaymentMethodMismatch
 		}
+		if topUp.Status == common.TopUpStatusSuccess {
+			alreadyDone = true
+			return nil
+		}
 
 		if topUp.Status != common.TopUpStatusPending {
 			return errors.New("invalid top-up order status")
+		}
+		topUp.PaymentReceived = &paymentReceived
+		referralReward, err = awardFirstTopUpReferralRewardTx(tx, topUp)
+		if err != nil {
+			return err
 		}
 
 		topUp.CompleteTime = common.GetTimestamp()
@@ -282,6 +305,10 @@ func Recharge(referenceId string, customerId string, callerIp string) (err error
 		common.SysError(common.LogText("topup failed: %s", err.Error()))
 		return errors.New("top-up failed")
 	}
+	if alreadyDone {
+		return nil
+	}
+	recordFirstTopUpReferralReward(referralReward)
 	syncCreditUserQuotaCache(topUp.UserId, quota, common.LogText("stripe topup"))
 
 	RecordTopupLog(topUp.UserId, common.NewMessage("Online top-up succeeded, amount added: {{quota}}, payment amount: {{amount}}", map[string]any{"quota": logger.FormatQuota(quota), "amount": topUp.Amount}), callerIp, topUp.PaymentMethod, PaymentMethodStripe)
@@ -459,6 +486,7 @@ func ManualCompleteTopUp(tradeNo string, callerIp string) error {
 
 	var userId int
 	var quotaToAdd int
+	var referralReward *FirstTopUpReferralReward
 	var payMoney float64
 	var paymentMethod string
 
@@ -476,6 +504,13 @@ func ManualCompleteTopUp(tradeNo string, callerIp string) error {
 
 		if topUp.Status != common.TopUpStatusPending {
 			return common.NewMessage("Order is not pending payment and cannot be completed")
+		}
+		paymentReceived := topUp.Money > 0
+		topUp.PaymentReceived = &paymentReceived
+		var rewardErr error
+		referralReward, rewardErr = awardFirstTopUpReferralRewardTx(tx, topUp)
+		if rewardErr != nil {
+			return rewardErr
 		}
 
 		// 计算应充值额度：
@@ -518,16 +553,18 @@ func ManualCompleteTopUp(tradeNo string, callerIp string) error {
 	}
 
 	// 事务外记录日志，避免阻塞
+	recordFirstTopUpReferralReward(referralReward)
 	syncCreditUserQuotaCache(userId, quotaToAdd, common.LogText("manual topup"))
 	RecordTopupLog(userId, common.NewMessage("Administrator completed the order, amount added: {{quota}}, payment amount: {{amount}}", map[string]any{"quota": logger.FormatQuota(quotaToAdd), "amount": fmt.Sprintf("%f", payMoney)}), callerIp, paymentMethod, "admin")
 	return nil
 }
-func RechargeCreem(referenceId string, customerEmail string, customerName string, callerIp string) (err error) {
+func RechargeCreem(referenceId string, customerEmail string, customerName string, callerIp string, paymentReceived bool) (err error) {
 	if referenceId == "" {
 		return errors.New("payment order number not provided")
 	}
 
 	var quota int
+	var referralReward *FirstTopUpReferralReward
 	topUp := &TopUp{}
 
 	refCol := "`trade_no`"
@@ -547,6 +584,11 @@ func RechargeCreem(referenceId string, customerEmail string, customerName string
 
 		if topUp.Status != common.TopUpStatusPending {
 			return errors.New("invalid top-up order status")
+		}
+		topUp.PaymentReceived = &paymentReceived
+		referralReward, err = awardFirstTopUpReferralRewardTx(tx, topUp)
+		if err != nil {
+			return err
 		}
 
 		topUp.CompleteTime = common.GetTimestamp()
@@ -587,6 +629,7 @@ func RechargeCreem(referenceId string, customerEmail string, customerName string
 		common.SysError(common.LogText("creem topup failed: %s", err.Error()))
 		return errors.New("top-up failed")
 	}
+	recordFirstTopUpReferralReward(referralReward)
 	syncCreditUserQuotaCache(topUp.UserId, quota, common.LogText("creem topup"))
 
 	RecordTopupLog(topUp.UserId, common.NewMessage("{{provider}} top-up succeeded, amount added: {{quota}}, payment amount: {{amount}}", map[string]any{"provider": "Creem", "quota": quota, "amount": fmt.Sprintf("%.2f", topUp.Money)}), callerIp, topUp.PaymentMethod, PaymentMethodCreem)
@@ -600,6 +643,7 @@ func RechargeWaffo(tradeNo string, callerIp string) (err error) {
 	}
 
 	var quotaToAdd int
+	var referralReward *FirstTopUpReferralReward
 	topUp := &TopUp{}
 
 	refCol := "`trade_no`"
@@ -624,6 +668,12 @@ func RechargeWaffo(tradeNo string, callerIp string) (err error) {
 		if topUp.Status != common.TopUpStatusPending {
 			return errors.New("invalid top-up order status")
 		}
+		paymentReceived := topUp.Money > 0
+		topUp.PaymentReceived = &paymentReceived
+		referralReward, err = awardFirstTopUpReferralRewardTx(tx, topUp)
+		if err != nil {
+			return err
+		}
 
 		quotaToAdd, err = common.WalletQuotaFromDecimalStrict(
 			decimal.NewFromInt(topUp.Amount).Mul(decimal.NewFromFloat(common.QuotaPerUnit)),
@@ -645,6 +695,7 @@ func RechargeWaffo(tradeNo string, callerIp string) (err error) {
 		common.SysError(common.LogText("waffo topup failed: %s", err.Error()))
 		return errors.New("top-up failed")
 	}
+	recordFirstTopUpReferralReward(referralReward)
 	syncCreditUserQuotaCache(topUp.UserId, quotaToAdd, common.LogText("waffo topup"))
 
 	if quotaToAdd > 0 {
@@ -660,6 +711,7 @@ func RechargeWaffoPancake(tradeNo string) (err error) {
 	}
 
 	var quotaToAdd int
+	var referralReward *FirstTopUpReferralReward
 	topUp := &TopUp{}
 
 	refCol := "`trade_no`"
@@ -684,6 +736,12 @@ func RechargeWaffoPancake(tradeNo string) (err error) {
 		if topUp.Status != common.TopUpStatusPending {
 			return errors.New("invalid top-up order status")
 		}
+		paymentReceived := topUp.Money > 0
+		topUp.PaymentReceived = &paymentReceived
+		referralReward, err = awardFirstTopUpReferralRewardTx(tx, topUp)
+		if err != nil {
+			return err
+		}
 
 		quotaToAdd, err = common.WalletQuotaFromDecimalStrict(
 			decimal.NewFromInt(topUp.Amount).Mul(decimal.NewFromFloat(common.QuotaPerUnit)),
@@ -705,6 +763,7 @@ func RechargeWaffoPancake(tradeNo string) (err error) {
 		common.SysError(common.LogText("waffo pancake topup failed: %s", err.Error()))
 		return errors.New("top-up failed")
 	}
+	recordFirstTopUpReferralReward(referralReward)
 	syncCreditUserQuotaCache(topUp.UserId, quotaToAdd, common.LogText("waffo pancake topup"))
 
 	if quotaToAdd > 0 {

@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "暫時無法載入目前價格",
     "For this model in group:": "適用於此模型的群組：",
     "Half the official price, or less.": "精選模型，低至官網 5 折",
-    "Half-price model offer": "半價模型優惠"
+    "Half-price model offer": "半價模型優惠",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "受邀好友首次付費充值成功後，你可獲得 {{amount}} 推薦獎勵。每位好友僅獎勵一次，最低充值金額以支付管道設定為準。",
+    "First top-up referral reward (USD)": "好友首次充值邀請獎勵（美元）",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "受邀使用者 {{user_id}} 首次充值，獲得邀請獎勵 {{quota}}",
+    "Invalid first top-up referral reward": "首次充值邀請獎勵金額無效",
+    "Referral reward balance limit exceeded": "推薦獎勵餘額超出上限",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "受邀好友首次付費充值成功後，獎勵會發放給邀請人。設為 0 可關閉，充值門檻沿用支付管道設定。"
   }
 }

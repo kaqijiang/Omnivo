@@ -342,6 +342,9 @@ export function Wallet(props: WalletProps) {
             <AffiliateRewardsCard
               user={user}
               affiliateLink={affiliateLink}
+              firstTopupRewardUSD={
+                topupInfo?.first_topup_referral_reward_usd ?? 0
+              }
               onTransfer={() => setTransferDialogOpen(true)}
               complianceConfirmed={
                 topupInfo?.payment_compliance_confirmed !== false

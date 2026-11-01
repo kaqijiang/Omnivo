@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "Не удалось загрузить текущие цены",
     "For this model in group:": "Для этой модели в группе:",
     "Half the official price, or less.": "Не более половины официальной цены.",
-    "Half-price model offer": "Модель за полцены"
+    "Half-price model offer": "Модель за полцены",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "Получите {{amount}} на реферальный баланс после первого успешного платного пополнения приглашённым другом. Бонус начисляется один раз за каждого друга; действует минимум выбранного способа оплаты.",
+    "First top-up referral reward (USD)": "Бонус за первое пополнение приглашённого пользователя (USD)",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "Реферальный бонус {{quota}} за первое пополнение приглашённого пользователя {{user_id}}",
+    "Invalid first top-up referral reward": "Недопустимая сумма бонуса за первое пополнение",
+    "Referral reward balance limit exceeded": "Превышен лимит реферального баланса",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "Бонус начисляется пригласившему пользователю после первого платного пополнения приглашённым другом. Укажите 0, чтобы отключить. Действуют минимальные суммы пополнения для выбранного способа оплаты."
   }
 }

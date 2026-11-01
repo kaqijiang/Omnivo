@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "現在の料金を読み込めません",
     "For this model in group:": "このモデルの対象グループ：",
     "Half the official price, or less.": "公式料金の半額以下。",
-    "Half-price model offer": "モデルの半額オファー"
+    "Half-price model offer": "モデルの半額オファー",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "招待した友達が初めて有料チャージに成功すると、{{amount}} の紹介クレジットを受け取れます。友達 1 人につき 1 回限りで、各決済方法の最低チャージ額が適用されます。",
+    "First top-up referral reward (USD)": "招待した友達の初回チャージ報酬（USD）",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "招待したユーザー {{user_id}} の初回チャージによる紹介報酬 {{quota}}",
+    "Invalid first top-up referral reward": "初回チャージの紹介報酬額が無効です",
+    "Referral reward balance limit exceeded": "紹介報酬の残高上限を超えています",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "招待した友達が初めて有料チャージを完了すると、招待者に報酬が付与されます。0 に設定すると無効になります。最低チャージ額は各決済方法の設定に従います。"
   }
 }

@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "Không thể tải giá hiện tại",
     "For this model in group:": "Áp dụng cho mô hình này trong nhóm:",
     "Half the official price, or less.": "Bằng nửa giá chính thức hoặc thấp hơn.",
-    "Half-price model offer": "Ưu đãi mô hình nửa giá"
+    "Half-price model offer": "Ưu đãi mô hình nửa giá",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "Nhận {{amount}} vào số dư giới thiệu khi người bạn được mời nạp tiền có thanh toán thành công lần đầu. Mỗi người bạn chỉ mang lại thưởng một lần; áp dụng mức nạp tối thiểu của phương thức thanh toán.",
+    "First top-up referral reward (USD)": "Thưởng giới thiệu cho lần nạp đầu tiên (USD)",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "Thưởng giới thiệu {{quota}} cho lần nạp đầu tiên của người dùng được mời {{user_id}}",
+    "Invalid first top-up referral reward": "Số tiền thưởng giới thiệu cho lần nạp đầu tiên không hợp lệ",
+    "Referral reward balance limit exceeded": "Đã vượt giới hạn số dư thưởng giới thiệu",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "Phần thưởng được cộng cho người mời khi người bạn được mời hoàn tất lần nạp tiền có thanh toán đầu tiên. Đặt thành 0 để tắt. Áp dụng mức nạp tối thiểu hiện có của phương thức thanh toán."
   }
 }

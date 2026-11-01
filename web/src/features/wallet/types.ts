@@ -156,6 +156,8 @@ export interface TopupInfo {
   payment_compliance_confirmed?: boolean
   /** Current compliance terms version */
   payment_compliance_terms_version?: string
+  /** USD referral credit awarded to the inviter on a friend's first paid top-up */
+  first_topup_referral_reward_usd?: number
 }
 
 /**

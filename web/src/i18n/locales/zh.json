@@ -7552,6 +7552,12 @@
     "Unable to load current prices": "暂时无法加载当前价格",
     "For this model in group:": "适用于此模型的分组：",
     "Half the official price, or less.": "精选模型，低至官网 5 折",
-    "Half-price model offer": "半价模型优惠"
+    "Half-price model offer": "半价模型优惠",
+    "Earn {{amount}} in referral credit when an invited friend makes their first successful paid top-up. Awarded once per friend; the payment method's minimum top-up applies.": "受邀好友首次付费充值成功后，你可获得 {{amount}} 推广奖励。每位好友仅奖励一次，最低充值金额以支付渠道设置为准。",
+    "First top-up referral reward (USD)": "好友首充邀请奖励（美元）",
+    "First top-up referral reward {{quota}} for inviting user {{user_id}}": "受邀用户 {{user_id}} 首次充值，获得邀请奖励 {{quota}}",
+    "Invalid first top-up referral reward": "首充邀请奖励金额无效",
+    "Referral reward balance limit exceeded": "推广奖励余额超出上限",
+    "Reward credited to the inviter when an invited friend completes their first paid top-up. Set to 0 to disable. Existing payment minimums apply.": "受邀好友首次付费充值成功后，奖励发放给邀请人。设为 0 可关闭，充值门槛沿用支付渠道设置。"
   }
 }
