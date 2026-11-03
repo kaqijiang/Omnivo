@@ -95,4 +95,4 @@ docker compose -f compose.local.yml start
 - 构建因内存不足被终止：在 Docker Desktop 的 Resources 中增加可用内存后重试。
 - 页面无法打开：先查看 `ps` 和 `logs`；只有容器启动并通过健康检查后才能访问。
 
-此配置面向本机使用；需要让其他设备或公网访问时，应另外配置服务器、域名和 HTTPS。
+此配置面向本机使用；部署公网服务器、域名和 HTTPS 请参阅 [Linux 服务器部署说明](README.server.zh-CN.md)。

@@ -1,0 +1,5 @@
+{$OMNIVO_DOMAIN} {
+	# Caddy manages HTTPS, immediately flushes SSE, and supports WebSocket
+	# upgrades. Keep its default request cancellation on client disconnects.
+	reverse_proxy omnivo:3000
+}

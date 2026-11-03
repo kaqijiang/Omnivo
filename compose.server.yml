@@ -1,0 +1,57 @@
+# Single-server Omnivo deployment, built from this repository's New API source.
+# Requires Docker Compose 2.24.4+ for !reset. See README.server.zh-CN.md.
+name: omnivo-server
+
+services:
+  omnivo:
+    extends:
+      file: compose.local.yml
+      service: omnivo
+    # Only Caddy accepts public connections; remove the inherited local port.
+    ports: !reset []
+    environment:
+      TRUSTED_PROXIES: "${OMNIVO_PROXY_IP:-172.30.90.2}"
+      SESSION_COOKIE_SECURE: "true"
+      SESSION_COOKIE_TRUSTED_URL: "https://${OMNIVO_DOMAIN:?Set OMNIVO_DOMAIN in .env.server}"
+    networks:
+      gateway:
+        ipv4_address: "${OMNIVO_APP_IP:-172.30.90.3}"
+
+  caddy:
+    image: caddy:2-alpine@sha256:e70b164da81ef698b3ad19af799ea6086ce6d9e48ed4079eb9fe26f6fbf14ee5
+    restart: unless-stopped
+    depends_on:
+      omnivo:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      OMNIVO_DOMAIN: "${OMNIVO_DOMAIN:?Set OMNIVO_DOMAIN in .env.server}"
+      # Docker clients may inject an outbound proxy; keep service traffic local.
+      NO_PROXY: "omnivo,localhost,127.0.0.1,::1"
+      no_proxy: "omnivo,localhost,127.0.0.1,::1"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      gateway:
+        ipv4_address: "${OMNIVO_PROXY_IP:-172.30.90.2}"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  gateway:
+    # Omnivo needs outbound access to model providers and payment services.
+    ipam:
+      config:
+        - subnet: "${OMNIVO_NETWORK_SUBNET:-172.30.90.0/24}"
+
+volumes:
+  data:
+  caddy_data:
+  caddy_config:
