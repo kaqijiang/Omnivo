@@ -43,7 +43,7 @@ export function OmnivoLanding(props: OmnivoLandingProps) {
     <main>
       <section
         aria-labelledby='omnivo-hero-title'
-        className='omnivo-home-hero relative isolate px-5 pt-28 pb-12 sm:px-8 sm:pt-36 sm:pb-16'
+        className='relative isolate px-5 pt-28 pb-12 sm:px-8 sm:pt-36 sm:pb-16'
       >
         <div className='mx-auto flex max-w-5xl flex-col items-center text-center'>
           <Link
