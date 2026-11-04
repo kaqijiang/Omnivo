@@ -94,6 +94,7 @@ import { USAGE_BILLING_PATH, type LogOtherData } from '../../types'
 import { ResponseModelDetails } from '../model-badge'
 import { PluginAuthorLink } from '../plugin-author-link'
 import { DetailRow, DetailSection } from './log-detail-layout'
+import { RequestContentPanel } from './request-content-panel'
 
 // Maps a channel-update changed-field token (as recorded by the backend audit)
 // to its i18n label key for display in the audit details.
@@ -965,6 +966,15 @@ export function DetailsDialog(props: DetailsDialogProps) {
             ) : null}
           </DetailSection>
         ) : null}
+
+        {(props.log.type === 2 || props.log.type === 5) &&
+          props.log.request_id && (
+            <RequestContentPanel
+              requestId={props.log.request_id}
+              isRoot={props.isRoot}
+              open={props.open}
+            />
+          )}
 
         {props.isRoot && other?.root_info ? (
           <DetailSection label={t('Root Diagnostics')}>

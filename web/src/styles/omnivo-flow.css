@@ -1,0 +1,390 @@
+/*
+Copyright (C) 2023-2026 QuantumNous
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+For commercial licensing, please contact support@quantumnous.com
+*/
+.omnivo-flow {
+  --flow-play-state: running;
+  --flow-signal: #25856b;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(
+      ellipse at 48% 50%,
+      color-mix(in srgb, var(--omnivo-mint) 9%, transparent),
+      transparent 57%
+    ),
+    var(--card);
+}
+.dark .omnivo-flow {
+  --flow-signal: var(--omnivo-mint);
+}
+.omnivo-flow[data-motion='paused'] {
+  --flow-play-state: paused;
+}
+.omnivo-flow-stage {
+  position: relative;
+  margin-top: -1rem;
+}
+.omnivo-flow-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.omnivo-flow-floor {
+  fill: color-mix(in srgb, var(--muted) 40%, transparent);
+  stroke: var(--border);
+  stroke-width: 0.6;
+  opacity: 0.7;
+}
+.omnivo-flow-floor path + path {
+  fill: none;
+  opacity: 0.6;
+}
+.omnivo-flow-platform {
+  stroke: color-mix(in srgb, var(--muted-foreground) 28%, var(--border));
+  stroke-width: 1;
+}
+.omnivo-flow-face-left {
+  fill: var(--secondary);
+}
+.omnivo-flow-face-right {
+  fill: color-mix(in srgb, var(--muted-foreground) 12%, var(--card));
+}
+.omnivo-flow-face-top {
+  fill: var(--card);
+}
+.omnivo-flow-shadow {
+  fill: var(--foreground);
+  opacity: 0.045;
+}
+.omnivo-flow-idle {
+  opacity: 0.6;
+}
+.omnivo-flow-chip {
+  stroke: var(--muted-foreground);
+}
+.omnivo-flow-selected .omnivo-flow-face-top {
+  fill: color-mix(in srgb, var(--omnivo-mint) 15%, var(--card));
+}
+.omnivo-flow-selected .omnivo-flow-chip {
+  stroke: var(--flow-signal);
+}
+.omnivo-flow-server-slots {
+  stroke: var(--muted-foreground);
+  stroke-width: 2;
+  opacity: 0.55;
+}
+.omnivo-flow-idle-routes {
+  stroke: var(--border);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+}
+.omnivo-flow-track {
+  stroke: var(--muted);
+  stroke-width: 12;
+}
+.omnivo-flow-route {
+  stroke: color-mix(in srgb, var(--flow-signal) 32%, var(--card));
+  stroke-width: 1.3;
+}
+.omnivo-flow-return-route {
+  stroke-dasharray: 2 5;
+}
+.omnivo-flow-packets {
+  stroke: var(--flow-signal);
+  stroke-width: 4;
+}
+.omnivo-flow-incoming,
+.omnivo-flow-outgoing {
+  stroke-dasharray: 5 105;
+  opacity: 0;
+}
+.omnivo-flow-incoming {
+  animation: omnivo-flow-in 10s linear infinite;
+}
+.omnivo-flow-outgoing {
+  animation: omnivo-flow-out 10s linear infinite;
+}
+.omnivo-flow-returning {
+  stroke-dasharray: 1.2 9;
+  opacity: 0;
+  animation: omnivo-flow-back 10s linear infinite;
+}
+.omnivo-flow-app-window {
+  fill: var(--card);
+  stroke: var(--border);
+  stroke-width: 1.3;
+}
+.omnivo-flow-app-window > svg {
+  stroke: var(--muted-foreground);
+}
+.omnivo-flow-window-divider {
+  stroke: var(--border);
+}
+.omnivo-flow-window-dots {
+  fill: var(--muted-foreground);
+  stroke: none;
+  opacity: 0.45;
+}
+.omnivo-flow-code-line {
+  stroke: var(--border);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.omnivo-flow-output {
+  stroke: var(--flow-signal);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  animation: omnivo-flow-output 10s linear infinite;
+}
+.omnivo-flow-hub .omnivo-flow-face-top {
+  fill: var(--omnivo-ink);
+}
+.omnivo-flow-hub .omnivo-flow-face-left {
+  fill: #232c30;
+}
+.omnivo-flow-hub .omnivo-flow-face-right {
+  fill: #1c2428;
+}
+.omnivo-flow-hub .omnivo-flow-platform {
+  stroke: #3b4d47;
+}
+.omnivo-flow-hub-seam {
+  stroke: var(--omnivo-mint);
+  opacity: 0.13;
+}
+.omnivo-flow-hub-lights {
+  stroke: var(--omnivo-mint);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.omnivo-flow-port {
+  fill: var(--omnivo-mint);
+  stroke: var(--flow-signal);
+  stroke-width: 1.5;
+}
+.omnivo-flow-model-glow {
+  stroke: var(--flow-signal);
+  stroke-width: 1.5;
+  opacity: 0.15;
+  animation: omnivo-flow-model 10s linear infinite;
+}
+.omnivo-flow-spark {
+  stroke: var(--flow-signal);
+  opacity: 0.6;
+}
+.omnivo-flow-wordmark {
+  position: absolute;
+  left: 46.8%;
+  top: 76%;
+  transform: translateX(-50%);
+  color: var(--foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+.omnivo-flow-protocol {
+  position: absolute;
+  left: 8.8%;
+  top: 4%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--muted-foreground);
+  font:
+    0.6rem ui-monospace,
+    monospace;
+  letter-spacing: 0.025em;
+}
+.omnivo-flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--border);
+}
+.omnivo-flow-steps li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--foreground);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.omnivo-flow-steps svg,
+.omnivo-flow-steps img {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+.omnivo-flow-steps svg {
+  color: var(--muted-foreground);
+  stroke-width: 1.5;
+}
+.omnivo-flow-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.omnivo-flow-legend i {
+  display: block;
+  width: 1.1rem;
+  height: 3px;
+  border-radius: 2px;
+}
+.omnivo-flow-request-key {
+  background: var(--flow-signal);
+}
+.omnivo-flow-response-key {
+  background: repeating-linear-gradient(
+    to right,
+    var(--flow-signal) 0 2px,
+    transparent 2px 5px
+  );
+}
+.omnivo-flow .omnivo-flow-animated {
+  animation-play-state: var(--flow-play-state);
+}
+@keyframes omnivo-flow-in {
+  0%,
+  5% {
+    stroke-dashoffset: 6;
+    opacity: 0;
+  }
+  7% {
+    opacity: 1;
+  }
+  26% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  27%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+@keyframes omnivo-flow-out {
+  0%,
+  28% {
+    stroke-dashoffset: 6;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  48% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  49%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+@keyframes omnivo-flow-back {
+  0%,
+  53% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  57% {
+    opacity: 1;
+  }
+  87% {
+    stroke-dashoffset: -62;
+    opacity: 1;
+  }
+  92%,
+  100% {
+    stroke-dashoffset: -70;
+    opacity: 0;
+  }
+}
+@keyframes omnivo-flow-output {
+  0%,
+  65% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  68% {
+    opacity: 1;
+  }
+  89%,
+  95% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes omnivo-flow-model {
+  0%,
+  43%,
+  90%,
+  100% {
+    opacity: 0.12;
+  }
+  50%,
+  80% {
+    opacity: 0.7;
+  }
+}
+@media (max-width: 639px) {
+  .omnivo-flow-stage {
+    margin-top: 0.25rem;
+  }
+  .omnivo-flow-wordmark {
+    left: 49.2%;
+    top: 67%;
+    font-size: 0.8rem;
+  }
+  .omnivo-flow-protocol {
+    left: 7%;
+    top: 13%;
+    font-size: 0.55rem;
+  }
+  .omnivo-flow-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 0.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .omnivo-flow .omnivo-flow-animated {
+    animation: none;
+  }
+  .omnivo-flow-incoming,
+  .omnivo-flow-outgoing,
+  .omnivo-flow-returning {
+    opacity: 0;
+  }
+  .omnivo-flow-output {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  .omnivo-flow-model-glow {
+    opacity: 0.35;
+  }
+}

@@ -178,6 +178,16 @@ func main() {
 	}
 
 	// Initialize HTTP server
+	if err := service.InitRequestContentArchive(); err != nil {
+		common.SysError(common.LogText("Request content archive initialization failed; retention is unavailable"))
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := service.CloseRequestContentArchive(ctx); err != nil {
+			common.SysError(common.LogText("Request content archive shutdown did not finish cleanly"))
+		}
+	}()
 	server := gin.New()
 	if err := middleware.ConfigureTrustedProxies(server); err != nil {
 		common.FatalLog(common.LogText("failed to configure trusted proxies: %s", err.Error()))

@@ -36,9 +36,45 @@ import {
   useSystemConfigStore,
 } from '@/stores/system-config-store'
 
+import { OmnivoFlowBanner } from '../components/omnivo-flow-banner'
 import { OmnivoLanding } from '../components/omnivo-landing'
 
 let queryClient: QueryClient
+
+test('the flow animation can be paused and resumed with the keyboard', async () => {
+  const mediaQuery = window.matchMedia
+  vi.spyOn(window, 'matchMedia').mockImplementation((query) => ({
+    ...mediaQuery(query),
+    matches: false,
+  }))
+  const user = userEvent.setup()
+  render(<OmnivoFlowBanner />)
+
+  const pause = screen.getByRole('button', { name: 'Pause flow animation' })
+  pause.focus()
+  await user.keyboard('{Enter}')
+  expect(
+    screen.getByRole('button', { name: 'Play flow animation' })
+  ).toHaveFocus()
+  await user.keyboard(' ')
+  expect(
+    screen.getByRole('button', { name: 'Pause flow animation' })
+  ).toHaveFocus()
+})
+
+test('reduced motion keeps a readable flow illustration without an enabled playback control', () => {
+  render(<OmnivoFlowBanner />)
+
+  const flow = screen.getByRole('region', { name: 'Follow the flow.' })
+  expect(
+    within(flow).getByRole('button', { name: 'Reduced motion is enabled' })
+  ).toBeDisabled()
+  expect(within(flow).getByText('Your app')).toBeVisible()
+  expect(within(flow).getByText('One endpoint')).toBeVisible()
+  expect(within(flow).getByText('Selected model')).toBeVisible()
+  expect(within(flow).getByText('Streaming response')).toBeVisible()
+})
+
 const catalog: PricingData = {
   success: true,
   data: [],

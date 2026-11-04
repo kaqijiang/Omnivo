@@ -23,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
+import { OmnivoFlowBanner } from './omnivo-flow-banner'
 import { OmnivoModelDiscovery } from './omnivo-model-discovery'
 import { OmnivoModelSearch } from './omnivo-model-search'
 import { OmnivoFaq, OmnivoPricingStory } from './omnivo-pricing-story'
@@ -107,6 +108,7 @@ export function OmnivoLanding(props: OmnivoLandingProps) {
         </div>
       </section>
 
+      <OmnivoFlowBanner />
       <OmnivoModelDiscovery isAuthenticated={props.isAuthenticated} />
       <OmnivoPricingStory isAuthenticated={props.isAuthenticated} />
       <OmnivoQuickstart />

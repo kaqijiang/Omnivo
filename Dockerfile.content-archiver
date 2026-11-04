@@ -1,0 +1,30 @@
+FROM golang:1.26.10-alpine@sha256:9ce231b28998b32e116927c61aa5c406183061d4f3f2d61b292c88e7f6bdf7ca AS build
+ENV CGO_ENABLED=0 GOWORK=off
+ARG TARGETOS
+ARG TARGETARCH
+ARG GOPROXY=https://proxy.golang.org,direct
+ENV GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64}
+# Mount the filtered source read-only instead of copying a full builder layer.
+# This includes go.mod/go.sum and the local replace modules. Only dependencies
+# used by this command are downloaded; no frontend build is needed.
+# A corporate build CA can be supplied with --secret id=build_ca,src=... .
+RUN --mount=type=bind,target=/src,readonly \
+    --mount=type=secret,id=build_ca,required=false \
+    --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    cd /src \
+    && if [ -f /run/secrets/build_ca ]; then export SSL_CERT_FILE=/run/secrets/build_ca; fi \
+    && go build -p=2 -mod=readonly -trimpath -ldflags="-s -w" -o /content-archiver ./cmd/content-archiver \
+    && mkdir -p /archive-runtime/tmp \
+    && chmod 1777 /archive-runtime/tmp
+
+FROM scratch
+COPY --from=build /archive-runtime/ /
+COPY --from=build /content-archiver /content-archiver
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/local/go/lib/time/zoneinfo.zip /usr/share/zoneinfo/zoneinfo.zip
+COPY --chmod=0444 LICENSE NOTICE THIRD-PARTY-LICENSES.md /licenses/
+ENV ZONEINFO=/usr/share/zoneinfo/zoneinfo.zip
+USER 65532:65532
+WORKDIR /tmp
+ENTRYPOINT ["/content-archiver"]

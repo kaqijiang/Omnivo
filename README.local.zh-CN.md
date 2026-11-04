@@ -12,17 +12,27 @@
 ```bash
 git clone --depth 1 https://github.com/kaqijiang/Omnivo.git
 cd Omnivo
-docker compose -f compose.local.yml up -d --build --wait
-docker compose -f compose.local.yml ps
+bash ./start-omnivo.command
 ```
 
-如果已经克隆了仓库，在已有的 `Omnivo` 目录运行 `git pull --ff-only`，然后执行上面的 Compose 命令。首次构建需要联网下载基础镜像及依赖；后续会复用 Docker 缓存。Intel Mac 与 Apple Silicon Mac 使用各自的原生架构，无需添加 `--platform`。
+如果已有 `/Users/j/GitHub/Omnivo`，直接更新原目录，无需另建部署目录：
+
+```bash
+cd /Users/j/GitHub/Omnivo
+git pull --ff-only origin main && bash ./start-omnivo.command
+```
+
+启动脚本会补充 Docker Desktop 的命令路径、检查本机 Docker Engine、构建当前源码，并在升级已有实例前将完整数据卷备份到 `~/Omnivo-backups/`。构建失败不会停止原服务；备份失败会尝试重启原容器。新版本开始启动后不会自动降级数据库。脚本沿用 `omnivo-local` 项目和已有端口；自定义项目名可通过 `OMNIVO_PROJECT` 指定。使用自定义数据挂载或 `compose.capture.yml` 的实例应按原配置升级，脚本会停止以免覆盖配置。
+
+首次构建需要联网下载基础镜像及依赖；后续会复用 Docker 缓存。Intel Mac 与 Apple Silicon Mac 使用各自的原生架构，无需添加 `--platform`。也可以直接运行 `docker compose -f compose.local.yml up -d --build --wait`，但该命令不会自动备份。
 
 容器显示 `healthy` 后，在浏览器输入 `http://localhost:3000`。首次访问会进入初始化向导，请自行设置管理员账号和密码。完成初始化后即可浏览首页、文档、模型目录和控制台。
 
 请使用 `compose.local.yml`：仓库原有 `docker-compose.yml` 使用上游发布镜像，不包含本仓库定制的 Omnivo 页面。
 
 模型调用还需要在控制台配置供应商渠道、API Key 和可用模型；启动网站本身不会自动获得模型访问权限。请在本地管理页面录入供应商密钥，不要将密钥提交到 Git。
+
+需要保存请求和响应正文时，按[请求内容留存部署说明](README.capture.zh-CN.md)叠加 Kafka、归档服务和独立存储。该功能默认关闭，基础部署不需要这些额外服务。
 
 ## 好友首充邀请奖励
 
@@ -63,8 +73,7 @@ docker compose -f compose.local.yml start
 更新代码并重新构建：
 
 ```bash
-git pull --ff-only
-docker compose -f compose.local.yml up -d --build --wait
+git pull --ff-only origin main && bash ./start-omnivo.command
 ```
 
 如果有自己修改的代码，先保存修改再更新。更新前建议备份数据。

@@ -1,0 +1,213 @@
+# Optional single-server content archive for Omnivo / New API.
+# Merge with compose.local.yml OR compose.server.yml; see README.capture.zh-CN.md.
+# This development/single-server stack is not a highly available Kafka cluster.
+x-capture-environment: &capture-environment
+  CONTENT_ARCHIVE_BROKERS: capture-kafka:9092
+  CONTENT_ARCHIVE_TOPIC: ${CONTENT_ARCHIVE_TOPIC:-omnivo.request-content.v1}
+  CONTENT_ARCHIVE_GROUP: ${CONTENT_ARCHIVE_GROUP:-omnivo-content-archiver}
+  CONTENT_ARCHIVE_KEY: ${CONTENT_ARCHIVE_KEY:?Generate .env.capture first}
+  CONTENT_ARCHIVE_INDEX_DSN: postgres://capture:${CAPTURE_POSTGRES_PASSWORD:?Generate .env.capture first}@capture-postgres:5432/capture?sslmode=disable
+  CONTENT_ARCHIVE_S3_ENDPOINT: http://capture-s3:8333
+  CONTENT_ARCHIVE_S3_REGION: us-east-1
+  CONTENT_ARCHIVE_S3_BUCKET: ${CONTENT_ARCHIVE_S3_BUCKET:-omnivo-request-content}
+  CONTENT_ARCHIVE_S3_ACCESS_KEY: ${CONTENT_ARCHIVE_S3_ACCESS_KEY:?Generate .env.capture first}
+  CONTENT_ARCHIVE_S3_SECRET_KEY: ${CONTENT_ARCHIVE_S3_SECRET_KEY:?Generate .env.capture first}
+  CONTENT_ARCHIVE_S3_PATH_STYLE: "true"
+  CONTENT_ARCHIVE_MAX_BUFFERED_BYTES: ${CONTENT_ARCHIVE_MAX_BUFFERED_BYTES:-33554432}
+  CONTENT_ARCHIVE_MAX_ACTIVE: ${CONTENT_ARCHIVE_MAX_ACTIVE:-1024}
+  CONTENT_ARCHIVE_CHUNK_BYTES: ${CONTENT_ARCHIVE_CHUNK_BYTES:-32768}
+  CONTENT_ARCHIVE_FLUSH_INTERVAL_MS: ${CONTENT_ARCHIVE_FLUSH_INTERVAL_MS:-100}
+  CONTENT_ARCHIVE_MAX_BATCH_BYTES: ${CONTENT_ARCHIVE_MAX_BATCH_BYTES:-4194304}
+  CONTENT_ARCHIVE_MAX_POLL_RECORDS: ${CONTENT_ARCHIVE_MAX_POLL_RECORDS:-256}
+  NO_PROXY: capture-kafka,capture-postgres,capture-s3,localhost,127.0.0.1,::1
+  no_proxy: capture-kafka,capture-postgres,capture-s3,localhost,127.0.0.1,::1
+
+x-capture-logging: &capture-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  omnivo:
+    environment:
+      <<: *capture-environment
+    networks:
+      default: {}
+      capture: {}
+    depends_on:
+      capture-kafka-init:
+        condition: service_completed_successfully
+        required: false
+      capture-postgres:
+        condition: service_healthy
+        required: false
+      capture-storage-init:
+        condition: service_completed_successfully
+        required: false
+
+  content-archiver:
+    image: omnivo-content-archiver:local
+    build:
+      context: .
+      dockerfile: Dockerfile.content-archiver
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 40s
+    environment:
+      <<: *capture-environment
+    networks:
+      - capture
+    depends_on:
+      capture-kafka-init:
+        condition: service_completed_successfully
+      capture-postgres:
+        condition: service_healthy
+      capture-storage-init:
+        condition: service_completed_successfully
+    logging: *capture-logging
+
+  capture-postgres:
+    image: postgres:16.15@sha256:5db6dac2ef5dcff512f4f00a009c3c332b9f2f28f24277175bf3e4a3d02ef83a
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: capture
+      POSTGRES_PASSWORD: ${CAPTURE_POSTGRES_PASSWORD:?Generate .env.capture first}
+      POSTGRES_DB: capture
+    volumes:
+      - capture_postgres:/var/lib/postgresql/data
+    networks:
+      - capture
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U capture -d capture"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging: *capture-logging
+
+  capture-s3:
+    image: chrislusf/seaweedfs:3.97@sha256:bb05d66d2963b1cc48073190781c3dd29e2c4c88a2ae2986bf58e38c86d89c6e
+    restart: unless-stopped
+    working_dir: /data
+    entrypoint: ["/bin/sh", "-ec"]
+    environment:
+      CONTENT_ARCHIVE_S3_ACCESS_KEY: ${CONTENT_ARCHIVE_S3_ACCESS_KEY:?Generate .env.capture first}
+      CONTENT_ARCHIVE_S3_SECRET_KEY: ${CONTENT_ARCHIVE_S3_SECRET_KEY:?Generate .env.capture first}
+      NO_PROXY: capture-s3,localhost,127.0.0.1,::1
+      no_proxy: capture-s3,localhost,127.0.0.1,::1
+    command:
+      - |
+        umask 077
+        for value in "$$CONTENT_ARCHIVE_S3_ACCESS_KEY" "$$CONTENT_ARCHIVE_S3_SECRET_KEY"; do
+          case "$$value" in ''|*[!a-zA-Z0-9]*) echo "Use generated alphanumeric S3 credentials" >&2; exit 1;; esac
+        done
+        printf '{"identities":[{"name":"capture","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","Write","List","Tagging"]}]}' \
+          "$$CONTENT_ARCHIVE_S3_ACCESS_KEY" "$$CONTENT_ARCHIVE_S3_SECRET_KEY" > /tmp/capture-s3.json
+        exec weed server -dir=/data -ip=capture-s3 -ip.bind=0.0.0.0 \
+          -filer -s3 -s3.config=/tmp/capture-s3.json \
+          -master.volumeSizeLimitMB=1024 -volume.max=0 \
+          -volume.minFreeSpace=5 -master.telemetry=false
+    volumes:
+      - capture_objects:/data
+    networks:
+      - capture
+    healthcheck:
+      test: ["CMD-SHELL", "wget -Y off -q -O /dev/null http://localhost:9333/cluster/status && wget -Y off -q -O /dev/null http://localhost:8888/"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    logging: *capture-logging
+
+  capture-storage-init:
+    image: chrislusf/seaweedfs:3.97@sha256:bb05d66d2963b1cc48073190781c3dd29e2c4c88a2ae2986bf58e38c86d89c6e
+    restart: "no"
+    user: "0:0"
+    entrypoint: ["/bin/sh", "-ec"]
+    environment:
+      CONTENT_ARCHIVE_S3_BUCKET: ${CONTENT_ARCHIVE_S3_BUCKET:-omnivo-request-content}
+      NO_PROXY: capture-s3,localhost,127.0.0.1,::1
+      no_proxy: capture-s3,localhost,127.0.0.1,::1
+    command:
+      - |
+        chown 1000:1000 /kafka
+        case "$$CONTENT_ARCHIVE_S3_BUCKET" in ''|*[!a-z0-9.-]*) echo "Invalid archive bucket name" >&2; exit 1;; esac
+        printf 's3.bucket.create -name %s\n' "$$CONTENT_ARCHIVE_S3_BUCKET" | \
+          weed shell -master=capture-s3:9333 -filer=capture-s3:8888
+        wget -Y off -q -O /dev/null "http://capture-s3:8888/buckets/$$CONTENT_ARCHIVE_S3_BUCKET/"
+    volumes:
+      - capture_kafka:/kafka
+    networks:
+      - capture
+    depends_on:
+      capture-s3:
+        condition: service_healthy
+
+  capture-kafka:
+    image: apache/kafka:4.1.1@sha256:0bc1bb2478f45b6cea78864df86acdc11e8df2c5172477819a4d12942cbe5d40
+    restart: unless-stopped
+    stop_grace_period: 40s
+    environment:
+      CLUSTER_ID: ${CAPTURE_KAFKA_CLUSTER_ID:?Generate .env.capture first}
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://capture-kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@capture-kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_MIN_INSYNC_REPLICAS: "1"
+      KAFKA_DEFAULT_REPLICATION_FACTOR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx512m
+      KAFKA_LOG_RETENTION_HOURS: "24"
+      KAFKA_LOG_SEGMENT_BYTES: "67108864"
+      KAFKA_LOG_RETENTION_BYTES: "1073741824"
+    volumes:
+      - capture_kafka:/var/lib/kafka/data
+    networks:
+      - capture
+    depends_on:
+      capture-storage-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+    logging: *capture-logging
+
+  capture-kafka-init:
+    image: apache/kafka:4.1.1@sha256:0bc1bb2478f45b6cea78864df86acdc11e8df2c5172477819a4d12942cbe5d40
+    restart: "no"
+    entrypoint: ["/bin/sh", "-ec"]
+    environment:
+      CONTENT_ARCHIVE_TOPIC: ${CONTENT_ARCHIVE_TOPIC:-omnivo.request-content.v1}
+      KAFKA_HEAP_OPTS: -Xms64m -Xmx128m
+    command:
+      - |
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server capture-kafka:9092 \
+          --create --if-not-exists --topic "$$CONTENT_ARCHIVE_TOPIC" \
+          --partitions 3 --replication-factor 1 \
+          --config retention.ms=86400000 --config retention.bytes=1073741824 \
+          --config segment.bytes=67108864 --config max.message.bytes=1048576
+    networks:
+      - capture
+    depends_on:
+      capture-kafka:
+        condition: service_healthy
+
+networks:
+  default: {}
+  capture:
+    internal: true
+
+volumes:
+  capture_postgres:
+  capture_objects:
+  capture_kafka:

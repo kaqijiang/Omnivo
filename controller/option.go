@@ -199,6 +199,21 @@ func UpdateOption(c *gin.Context) {
 	default:
 		option.Value = fmt.Sprintf("%v", option.Value)
 	}
+	if strings.HasPrefix(option.Key, "request_content.") {
+		if _, ok := requestContentSession(c); !ok {
+			return
+		}
+		if err := service.ValidateRequestContentOption(c.Request.Context(), option.Key, option.Value.(string)); err != nil {
+			common.ApiErrorStatus(c, http.StatusBadRequest, common.NewMessage(err.Error()))
+			return
+		}
+		if err := model.UpdateOptionsBulk(map[string]string{option.Key: option.Value.(string)}); err != nil {
+			common.ApiErrorStatus(c, http.StatusServiceUnavailable, common.NewMessage("Request content storage is unavailable"))
+			return
+		}
+		common.ApiSuccess(c, nil)
+		return
+	}
 	switch option.Key {
 	case "QuotaForInviter", "QuotaForInvitee", operation_setting.FirstTopUpReferralRewardOption:
 		if isPositiveOptionValue(option.Value.(string)) && !operation_setting.IsPaymentComplianceConfirmed() {

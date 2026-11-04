@@ -136,6 +136,7 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		newAPIError = types.NewError(err, types.ErrorCodeGenRelayInfoFailed)
 		return
 	}
+	service.SetRequestContentRelayResult(c, relayInfo.OriginModelName, relaycommon.StreamOutcome{}, false)
 
 	defer func() {
 		recovered := recover()
@@ -144,6 +145,7 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			resultErr = types.NewError(fmt.Errorf("relay panic: %v", recovered), types.ErrorCodeBadResponse)
 		}
 		if relayFormat != types.RelayFormatOpenAIRealtime {
+			service.SetRequestContentRelayResult(c, relayInfo.OriginModelName, relayInfo.StreamStatus.OutcomeSnapshot(), resultErr != nil)
 			perfmetrics.RecordRelayResult(c.Request.Context(), relayInfo, resultErr)
 		}
 		if recovered != nil {
